@@ -1,8 +1,10 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 interface IERC20 {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
 }
 
 contract ThanatosAltar {
@@ -32,6 +34,11 @@ contract ThanatosAltar {
         require(amount > 0, "zero");
         require(IERC20(tokenAddress).transferFrom(msg.sender, address(this), amount), "transfer failed");
         emit TokenSacrificed(msg.sender, tokenAddress, amount, block.timestamp);
+    }
+
+    function forwardRebirthToken(address token, address to, uint256 amount) external onlyAgent {
+        require(token != address(0) && to != address(0), "zero");
+        require(IERC20(token).transfer(to, amount), "transfer failed");
     }
 
     function executeRebirthSeed(address factoryAddress, uint256 value, bytes calldata data) external onlyAgent returns (bytes memory) {

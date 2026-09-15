@@ -9,7 +9,7 @@ export const CHAIN = defineChain({
 
 export const ALTAR_ADDRESS = (process.env.ALTAR_ADDRESS ?? "0x0000000000000000000000000000000000000000") as Address;
 export const FEE_SPLITTER_ADDRESS = (process.env.FEE_SPLITTER_ADDRESS ?? "0x0000000000000000000000000000000000000000") as Address;
-export const PONS_FACTORY_ADDRESS = (process.env.PONS_FACTORY_ADDRESS ?? "0x3711ceA4feaDE896C913C68F01Eda97Cb06D1A42") as Address;
+export const PONS_FACTORY_ADDRESS = (process.env.PONS_FACTORY_ADDRESS ?? "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e") as Address;
 export const EXPLORER_URL = process.env.BLOCK_EXPLORER_URL ?? "https://robinhoodchain.blockscout.com";
 
 export const FIRST_EPOCH_DURATION_SEC = 6 * 3600;
@@ -30,6 +30,17 @@ export const altarAbi = [
       { name: "amount", type: "uint256", indexed: false },
       { name: "timestamp", type: "uint256", indexed: false },
     ],
+  },
+  {
+    type: "function",
+    name: "forwardRebirthToken",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "token", type: "address" },
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
   },
   {
     type: "function",
@@ -58,18 +69,70 @@ export const feeSplitterAbi = [
   { type: "function", name: "dividendPool", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] },
 ] as const;
 
-// ponytail: Pons ABI unverified; confirm signature against factory 0x3711...1A42 before mainnet
+export const PAIR_TOKEN = (process.env.PONS_PAIR_TOKEN ?? "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC") as Address;
+export const LAUNCH_CONFIG_ID = 0n;
+export const CREATOR_TAX_BPS = 95;
+export const SITE_URL = process.env.SITE_URL ?? "https://thanatos-e440a.web.app";
+
 export const ponsFactoryAbi = [
   {
     type: "function",
-    name: "launchAndBuy",
+    name: "launchToken",
     stateMutability: "payable",
     inputs: [
-      { name: "name", type: "string" },
-      { name: "symbol", type: "string" },
-      { name: "metadataURI", type: "string" },
-      { name: "feeRecipient", type: "address" },
+      {
+        name: "params",
+        type: "tuple",
+        components: [
+          { name: "name", type: "string" },
+          { name: "symbol", type: "string" },
+          { name: "logo", type: "string" },
+          { name: "description", type: "string" },
+          {
+            name: "socials",
+            type: "tuple",
+            components: [
+              { name: "twitter", type: "string" },
+              { name: "telegram", type: "string" },
+              { name: "discord", type: "string" },
+              { name: "website", type: "string" },
+              { name: "farcaster", type: "string" },
+            ],
+          },
+          { name: "creatorFeeRecipient", type: "address" },
+          { name: "creatorTaxBps", type: "uint16" },
+          { name: "buybackEnabled", type: "bool" },
+          { name: "expectedEconomics", type: "bytes32" },
+          { name: "salt", type: "bytes32" },
+        ],
+      },
+      { name: "launchConfigId", type: "uint256" },
+      { name: "pairToken", type: "address" },
+      { name: "snipeTaxExemptions", type: "address[]" },
     ],
     outputs: [{ name: "token", type: "address" }],
+  },
+  {
+    type: "function",
+    name: "previewLaunchEconomics",
+    stateMutability: "view",
+    inputs: [
+      { name: "launchConfigId", type: "uint256" },
+      { name: "pairToken", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bytes32" }],
+  },
+  { type: "function", name: "launchFee", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] },
+  {
+    type: "event",
+    name: "TokenLaunched",
+    inputs: [
+      { name: "token", type: "address", indexed: true },
+      { name: "curve", type: "address", indexed: true },
+      { name: "deployer", type: "address", indexed: true },
+      { name: "pairToken", type: "address", indexed: false },
+      { name: "launchConfigId", type: "uint256", indexed: false },
+      { name: "graduationThreshold", type: "uint256", indexed: false },
+    ],
   },
 ] as const;
