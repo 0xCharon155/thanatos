@@ -32,7 +32,7 @@ export function Header() {
       <div className="flex items-center gap-4">
         <nav className="hidden items-center gap-4 text-[10px] tracking-[0.2em] text-bone/50 md:flex">
           <Link href="/whitepaper" className="flex items-center gap-1 hover:text-bone"><BookOpen className="h-3 w-3" /> WHITEPAPER</Link>
-          <a href="https://Code2.com/0xCharon155/thanatos" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-bone"><Code2 className="h-3 w-3" /> Code2</a>
+          <a href="https://github.com/0xCharon155/thanatos" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-bone"><Code2 className="h-3 w-3" /> GITHUB</a>
         </nav>
         <span className={`hidden items-center gap-2 border border-ash px-3 py-1.5 text-[10px] tracking-[0.2em] sm:flex ${st.text}`}>
           <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${st.dot}`} />

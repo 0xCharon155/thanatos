@@ -19,7 +19,7 @@ export default function Whitepaper() {
     <main className="mx-auto min-h-screen max-w-3xl px-6 py-10">
       <div className="mb-8 flex items-center justify-between text-[10px] tracking-[0.2em]">
         <Link href="/" className="flex items-center gap-1 text-ember hover:text-flame"><ArrowLeft className="h-3 w-3" /> ALTAR</Link>
-        <a href="https://Code2.com/0xCharon155/thanatos" target="_blank" rel="noreferrer" className="flex items-center gap-1 text-bone/50 hover:text-bone"><Code2 className="h-3 w-3" /> SOURCE</a>
+        <a href="https://github.com/0xCharon155/thanatos" target="_blank" rel="noreferrer" className="flex items-center gap-1 text-bone/50 hover:text-bone"><Code2 className="h-3 w-3" /> SOURCE</a>
       </div>
 
       <div className="flex items-center gap-5">
