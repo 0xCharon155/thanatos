@@ -200,7 +200,7 @@ npx tsx src/services/twitterService.ts  # posts a test tweet (or dry-runs withou
 - Firestore rules: world-readable, zero client writes. All writes come from Cloud Functions.
 - Epoch transitions are guarded by a Firestore transaction mutex (`is_locked`) so a congested chain
   can never double-mint.
-- Seed buy is capped at `SEED_BUY_ETH` (0.05) and `maxFeePerGas` is pinned in the relayer.
+- Seed buy is capped at `SEED_BUY_ETH` (0.005) and `maxFeePerGas` is pinned in the relayer.
 - All LLM output is regex-sanitized before it touches a transaction.
 
 ---

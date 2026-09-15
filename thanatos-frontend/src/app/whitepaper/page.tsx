@@ -111,7 +111,7 @@ export default function Whitepaper() {
         Epoch 1 clock: 6 hours Â· later epochs: 24 hours (tunable)<br />
         Initial soul target: 1000 SW Â· grows 1.25Ã— per epoch<br />
         Clock bonus: +1 minute per soul weight burned<br />
-        Airdrop: top 50 by epoch Karma Â· seed buy capped at 0.05 ETH<br />
+        Airdrop: top 50 by epoch Karma Â· seed buy capped at 0.005 ETH<br />
         No presale Â· no team allocation Â· no staking lockups
       </Box>
 

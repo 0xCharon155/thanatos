@@ -16,7 +16,7 @@ export const FIRST_EPOCH_DURATION_SEC = 6 * 3600;
 export const EPOCH_DURATION_SEC = 24 * 3600;
 export const INITIAL_TARGET = 1000;
 export const TARGET_GROWTH = 1.25;
-export const SEED_BUY_ETH = "0.05";
+export const SEED_BUY_ETH = process.env.SEED_BUY_ETH ?? "0.005";
 export const CLOCK_BONUS_MIN_PER_SW = 1;
 export const TWEET_MIN_SW = 10;
 
