@@ -1,4 +1,5 @@
-﻿import { HowItWorks } from "@/components/HowItWorks";
+﻿import Link from "next/link";
+import { HowItWorks } from "@/components/HowItWorks";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { MetricStrip } from "@/components/MetricStrip";
@@ -35,7 +36,7 @@ export default function Page() {
         </div>
       </section>
           <footer className="border-t border-ash px-5 py-6 text-center text-[10px] tracking-[0.2em] text-bone/30">
-        THANATOS PROTOCOL · AUTONOMOUS · NON-CUSTODIAL · <a href="https://x.com/ThanatosAltar" target="_blank" rel="noreferrer" className="text-ember hover:text-flame">@THANATOSALTAR</a>
+        THANATOS PROTOCOL · AUTONOMOUS · NON-CUSTODIAL · <Link href="/whitepaper" className="text-ember hover:text-flame">WHITEPAPER</Link> · <a href="https://github.com/0xCharon155/thanatos" target="_blank" rel="noreferrer" className="text-ember hover:text-flame">GITHUB</a> · <a href="https://x.com/ThanatosAltar" target="_blank" rel="noreferrer" className="text-ember hover:text-flame">@THANATOSALTAR</a>
       </footer>
     </main>
   );
