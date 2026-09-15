@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+credentials.md
+*.secrets
+**/functions/.env.local.secrets
+*.pem
+*.key
+
+# build output
+thanatos-frontend/.next/
+thanatos-frontend/out/
+thanatos-frontend/next-env.d.ts
+thanatos-backend/functions/lib/
+thanatos-backend/artifacts/
+thanatos-backend/cache/
+thanatos-backend/typechain-types/
+
+# firebase
+.firebase/
+firebase-debug.log
+*-debug.log
+
+# misc
+.DS_Store
+*.tsbuildinfo
+npm-debug.log*

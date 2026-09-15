@@ -1,0 +1,45 @@
+"use client";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Skull } from "lucide-react";
+import { useAccount, useSwitchChain } from "wagmi";
+import { robinhoodChain } from "@/config/wagmi";
+import { useThanatosStore, type AltarStatus } from "@/store/useThanatosStore";
+
+const STATUS: Record<AltarStatus, { label: string; dot: string; text: string }> = {
+  ACTIVE_BURNING: { label: "EPOCH ACTIVE", dot: "bg-phosphor shadow-[0_0_8px_#4ade80]", text: "text-phosphor" },
+  EPOCH_EVALUATING: { label: "EVALUATING", dot: "bg-amber-400 shadow-[0_0_8px_#fbbf24]", text: "text-amber-400" },
+  REBIRTH_MINTING: { label: "REBIRTH MINTING", dot: "bg-purple-400 shadow-[0_0_8px_#c084fc]", text: "text-purple-400" },
+};
+
+export function Header() {
+  const status = useThanatosStore((s) => s.altar.status);
+  const { isConnected, chainId } = useAccount();
+  const { switchChain } = useSwitchChain();
+  const wrongChain = isConnected && chainId !== robinhoodChain.id;
+  const st = STATUS[status];
+
+  return (
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-ash bg-void/80 px-5 py-3 backdrop-blur-md">
+      <div className="flex items-center gap-3">
+        <Skull className="h-7 w-7 text-ember drop-shadow-[0_0_10px_#dc2626] animate-flicker" />
+        <div className="leading-tight">
+          <div className="text-sm font-bold tracking-[0.3em] text-bone">THANATOS</div>
+          <div className="text-[9px] tracking-[0.3em] text-bone/40">NECROMANCER PROTOCOL</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        <span className={`hidden items-center gap-2 border border-ash px-3 py-1.5 text-[10px] tracking-[0.2em] sm:flex ${st.text}`}>
+          <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${st.dot}`} />
+          {st.label}
+        </span>
+        {wrongChain ? (
+          <button onClick={() => switchChain({ chainId: robinhoodChain.id })} className="btn w-auto border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-void">
+            SWITCH NETWORK
+          </button>
+        ) : (
+          <ConnectButton showBalance accountStatus="address" chainStatus="none" />
+        )}
+      </div>
+    </header>
+  );
+}

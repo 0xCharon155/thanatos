@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(220, 38, 38, 0.18), transparent 60%),
+    radial-gradient(ellipse at 50% -20%, rgba(124, 58, 237, 0.08), transparent 50%),
+    #050505;
+  min-height: 100vh;
+}
+
+.panel {
+  @apply border border-ash bg-void/80 backdrop-blur-sm;
+}
+.panel-title {
+  @apply mb-3 flex items-center gap-2 text-[10px] tracking-[0.25em] text-bone/40;
+}
+.input {
+  @apply w-full border border-ash bg-black/60 px-3 py-2 text-sm text-bone placeholder-bone/20 outline-none transition-colors focus:border-ember;
+}
+.btn {
+  @apply w-full border px-4 py-2.5 text-xs font-semibold tracking-[0.2em] transition-all disabled:cursor-not-allowed disabled:opacity-30;
+}
+.btn-ember {
+  @apply btn border-ember text-ember hover:bg-ember hover:text-void hover:shadow-[0_0_20px_#dc262688];
+}
+.btn-flame {
+  @apply btn border-flame bg-flame/10 text-flame hover:bg-flame hover:text-void hover:shadow-[0_0_24px_#f9731688];
+}
+
+.crt {
+  position: relative;
+  background: #030503;
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+.crt::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.3) 2px 4px);
+}
+.crt::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.6));
+  z-index: 1;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #dc2626;
+}
