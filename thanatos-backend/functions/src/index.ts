@@ -1,8 +1,9 @@
-﻿import { onSchedule } from "firebase-functions/v2/scheduler";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onRequest } from "firebase-functions/v2/https";
 import { indexOnce, refreshAltarState } from "./workers/indexer";
 import { evaluateEpoch } from "./workers/epochDaemon";
 import { issueVoucher } from "./services/voucher";
+import { runSocialAgent } from "./workers/socialAgent";
 
 const secrets = ["AGENT_PRIVATE_KEY", "VERIFIER_PRIVATE_KEY", "LLM_API_KEY", "TWITTER_CONSUMER_SECRET", "TWITTER_ACCESS_TOKEN", "TWITTER_ACCESS_SECRET"];
 const region = "us-central1";
@@ -13,6 +14,10 @@ export const eventIndexer = onSchedule({ schedule: "every 1 minutes", region, se
 
 export const epochEvaluationDaemon = onSchedule({ schedule: "every 1 minutes", region, secrets, timeoutSeconds: 540 }, async () => {
   console.log("epoch:", await evaluateEpoch());
+});
+
+export const socialAgent = onSchedule({ schedule: "every 2 minutes", region, secrets, timeoutSeconds: 120 }, async () => {
+  console.log("social:", await runSocialAgent());
 });
 
 /** Public: EIP-712 deadness voucher for a token. Rate-limit at the edge (Cloud Armor / hosting rewrite). */
