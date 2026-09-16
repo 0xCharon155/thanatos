@@ -24,7 +24,7 @@
   put("#brand-mark", ic("logo-monogram", "i xl")); put("#foot-brand", ic("logo-monogram", "i"));
   put("#ico-inc", ic("flame")); put("#ico-tele", ic("terminal")); put("#ico-crown", ic("crown")); put("#ico-vault", ic("vault")); put("#ico-reb", ic("rebirth"));
   put("#ico-ext", ic("external-link", "i s")); put("#ico-sigil", ic("sigil-altar", "i")); put("#ico-shield", ic("shield-check", "i")); put("#net-glyph", ic("network")); put("#wallet-ico", ic("wallet"));
-  put("#hero-wm", ic("wordmark", "i") + $("#hero-wm").innerHTML); put("#climax-mark", ic("logo-etched", "i"));
+  put("#hero-wm", ic("wordmark", "i") + $("#hero-wm").innerHTML); put("#climax-mark", ic("logo-mark", "i"));
   $("#ico-sigil").querySelector("svg").style.cssText = "width:40px;height:40px"; $("#ico-shield").querySelector("svg").style.cssText = "width:28px;height:28px";
 
   // ── toasts (voice.md: sent / accepted / failed / claimed / rebirth; max 3; 8s; failed tidak hilang) ──
