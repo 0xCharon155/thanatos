@@ -1,3 +1,4 @@
+<img width="1500" height="500" alt="x-banner-1500x500" src="https://github.com/user-attachments/assets/f021ef10-a40a-4286-a4cc-dd93ecb8ddca" />
 # $THANATOS // The Autonomous Necromancer Protocol
 
 > Feed your dead tokens to the Altar. Every burn adds soul weight and bends the death clock.
