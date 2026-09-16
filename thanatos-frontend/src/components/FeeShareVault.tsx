@@ -30,7 +30,8 @@ export function FeeShareVault() {
       <div className="text-3xl font-semibold tabular-nums text-bone">
         {a.deployed ? Number(formatEther(d.claimable)).toFixed(5) : "—"} <span className="text-sm text-bone/40">ETH</span>
       </div>
-      <div className="mb-4 mt-1 text-bone/40">Lifetime paid out: {a.deployed ? a.totalDistributedEth.toFixed(4) : "—"} ETH</div>
+      <div className="mt-1 text-bone/40">Lifetime paid out: {a.deployed ? a.totalDistributedEth.toFixed(4) : "—"} ETH</div>
+      <div className="mb-4 text-bone/40">Buyback reserve: {a.deployed ? a.buybackReserveEth.toFixed(4) : "—"} ETH{a.buybackReserveEth > 0 ? " · burns once the route is live" : ""}</div>
       <button onClick={d.claim} disabled={!a.deployed || !address || d.claimable === 0n || d.isPending} className="btn-ember">
         {d.isPending ? "CLAIMING..." : "CLAIM FEE SHARE"}
       </button>

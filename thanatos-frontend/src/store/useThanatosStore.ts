@@ -14,7 +14,6 @@ export type Sacrifice = {
 
 export type LeaderEntry = { wallet: string; lifetimeKarma: number; epochKarma: number; burns: number; tier?: string };
 export type Reincarnation = { epoch: number; name: string; symbol: string; token: string; tx: string; createdAt: number };
-export type AirdropEntry = { epoch: number; amount: string; proof: `0x${string}`[]; token: string };
 
 type Store = {
   status: string;

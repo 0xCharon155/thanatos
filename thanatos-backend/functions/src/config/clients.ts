@@ -6,7 +6,7 @@ const ua = { fetchOptions: { headers: { "User-Agent": "Mozilla/5.0 ThanatosWorke
 
 export const readClient: PublicClient = createPublicClient({ chain: CHAIN, transport: http(PUBLIC_RPC_URL, ua) });
 
-/** Paid RPC for eth_getLogs (H-10); falls back to public for anything it can serve. */
+/** Paid RPC for eth_getLogs; falls back to public for anything it can serve. */
 export const logClient: PublicClient = createPublicClient({
   chain: CHAIN,
   transport: INDEXER_RPC_URL ? fallback([http(INDEXER_RPC_URL, ua), http(PUBLIC_RPC_URL, ua)]) : http(PUBLIC_RPC_URL, ua),

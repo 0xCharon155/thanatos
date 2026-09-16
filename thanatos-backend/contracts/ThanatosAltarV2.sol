@@ -7,22 +7,25 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {IReincarnator, IBuyback} from "./interfaces/IExecutors.sol";
+import {IReincarnator, IBuyback, IFeeEscrow} from "./interfaces/IExecutors.sol";
 
 /// @title THANATOS Altar v2
 /// @notice Burns dead tokens to 0x…dEaD, scores karma on-chain, runs epochs, splits treasury
-///         and pays fee share per epoch. Agent (keeper) can only trigger rebirth; it cannot
-///         move user funds. All setters are one-way frozen after setup.
+///         and pays fee share per epoch. The keeper can only trigger rebirth and buybacks; it
+///         cannot move user funds. All setters are one-way frozen after setup.
 contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     address public constant DEAD = 0x000000000000000000000000000000000000dEaD;
     uint256 public constant BPS = 10_000;
     uint256 public constant KARMA_SCALE = 1e18;
+    uint256 public constant CLOCK_BONUS_PER_KARMA = 1 minutes;
     bytes32 public constant VOUCHER_TYPEHASH =
         keccak256("Voucher(address token,uint16 multBps,uint64 expiry,uint256 chainId,address altar)");
 
-    enum Phase { Burning, Evaluating, Rebirth }
+    enum Phase { Burning, Evaluating }
+
+    IFeeEscrow public immutable feeEscrow;
 
     // ---- immutable-after-freeze config ----
     address public owner;
@@ -34,11 +37,13 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
     bool public frozen;
 
     uint256 public altarFee;
-    uint256 public baseKarma;
-    uint256 public baseCapPerWallet;
+    uint256 public verifiedKarma;
+    uint256 public unverifiedKarma;
+    uint256 public unverifiedCap;
     uint256 public maxClockBonusPerWallet;
-    uint256 public clockBonusPerKarma;
+    uint256 public minEpochDuration;
     uint256 public epochDuration;
+    uint256 public minTreasury;
     uint256 public targetGrowthBps;
     uint16 public protocolBps;
     uint16 public feeShareBps;
@@ -47,16 +52,18 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
 
     // ---- epoch state ----
     uint256 public epoch;
+    uint256 public epochStartedAt;
     uint256 public epochEndsAt;
     uint256 public soulWeight;
     uint256 public soulTarget;
     Phase public phase;
     uint256 public totalDistributed;
     uint256 public reserved;
+    uint256 public buybackReserve;
 
     mapping(uint256 => uint256) public totalKarmaOf;
     mapping(uint256 => mapping(address => uint256)) public karmaOf;
-    mapping(uint256 => mapping(address => uint256)) public unvouchedKarmaOf;
+    mapping(uint256 => mapping(address => uint256)) public unverifiedKarmaOf;
     mapping(uint256 => mapping(address => uint256)) public clockBonusOf;
     mapping(uint256 => uint256) public feePoolOf;
     mapping(address => uint256) public claimCursor;
@@ -64,6 +71,7 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
 
     event Offering(uint256 indexed epoch, address indexed wallet, address indexed token, uint256 amount, uint256 karma, bool verified, uint16 multBps, uint256 fee);
     event Sealed(uint256 indexed epoch, uint256 soulWeight, uint256 totalKarma);
+    event Extended(uint256 indexed epoch, uint256 endsAt);
     event Reborn(uint256 indexed epoch, address newToken, uint256 feeShare, uint256 seeded, uint256 buyback, uint256 protocol);
     event Claimed(address indexed wallet, uint256 amount, uint256 fromEpoch, uint256 toEpoch);
     event TreasuryIn(address indexed from, uint256 amount);
@@ -92,21 +100,25 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         address _keeper,
         address _verifier,
         address _protocolSplitter,
+        address _feeEscrow,
         uint256 _firstEpochDuration,
         uint256 _soulTarget
     ) EIP712("THANATOS Altar", "2") {
-        if (_owner == address(0) || _keeper == address(0) || _verifier == address(0) || _protocolSplitter == address(0)) revert ZeroAddress();
+        if (_owner == address(0) || _keeper == address(0) || _verifier == address(0) || _protocolSplitter == address(0) || _feeEscrow == address(0)) revert ZeroAddress();
         owner = _owner;
         keeper = _keeper;
         verifier = _verifier;
         protocolSplitter = _protocolSplitter;
+        feeEscrow = IFeeEscrow(_feeEscrow);
 
         altarFee = 0.0005 ether;
-        baseKarma = 38 * KARMA_SCALE;
-        baseCapPerWallet = 380 * KARMA_SCALE;
+        verifiedKarma = 38 * KARMA_SCALE;
+        unverifiedKarma = 5 * KARMA_SCALE;
+        unverifiedCap = 25 * KARMA_SCALE;
         maxClockBonusPerWallet = 30 minutes;
-        clockBonusPerKarma = 1 minutes;
+        minEpochDuration = 6 hours;
         epochDuration = 24 hours;
+        minTreasury = 0.01 ether;
         targetGrowthBps = 12_500;
         protocolBps = 2000;
         feeShareBps = 3000;
@@ -114,9 +126,9 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         buybackBps = 3000;
 
         epoch = 1;
+        epochStartedAt = block.timestamp;
         epochEndsAt = block.timestamp + _firstEpochDuration;
         soulTarget = _soulTarget;
-        phase = Phase.Burning;
     }
 
     receive() external payable {
@@ -147,20 +159,19 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
                 keccak256(abi.encode(VOUCHER_TYPEHASH, token, multBps, expiry, block.chainid, address(this)))
             );
             if (ECDSA.recover(digest, sig) != verifier) revert BadVoucher();
-            karma = (_baseFor(token, burned) * multBps) / BPS;
+            karma = ((verifiedKarma + _amountBonus(token, burned)) * multBps) / BPS;
         } else {
-            uint256 used = unvouchedKarmaOf[epoch][msg.sender];
-            uint256 room = used >= baseCapPerWallet ? 0 : baseCapPerWallet - used;
-            karma = Math.min(baseKarma, room);
-            unvouchedKarmaOf[epoch][msg.sender] = used + karma;
+            uint256 used = unverifiedKarmaOf[epoch][msg.sender];
+            karma = used >= unverifiedCap ? 0 : Math.min(unverifiedKarma, unverifiedCap - used);
+            unverifiedKarmaOf[epoch][msg.sender] = used + karma;
         }
 
         karmaOf[epoch][msg.sender] += karma;
         totalKarmaOf[epoch] += karma;
         soulWeight += karma;
 
-        if (verified && karma > 0) {
-            uint256 bonus = (karma * clockBonusPerKarma) / KARMA_SCALE;
+        if (verified && soulWeight < soulTarget) {
+            uint256 bonus = (karma * CLOCK_BONUS_PER_KARMA) / KARMA_SCALE;
             uint256 usedBonus = clockBonusOf[epoch][msg.sender];
             uint256 roomBonus = usedBonus >= maxClockBonusPerWallet ? 0 : maxClockBonusPerWallet - usedBonus;
             bonus = Math.min(bonus, roomBonus);
@@ -171,24 +182,38 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         emit TreasuryIn(msg.sender, msg.value);
         emit Offering(epoch, msg.sender, token, burned, karma, verified, multBps, msg.value);
 
-        if (soulWeight >= soulTarget) _seal();
+        if (soulWeight >= soulTarget) _onTarget();
     }
 
-    /// @dev log10(human amount + 1) scaled; min 1 karma. Decimals read best-effort.
-    function _baseFor(address token, uint256 burned) internal view returns (uint256) {
+    /// @dev log10(human amount + 1) scaled. Decimals read best-effort.
+    function _amountBonus(address token, uint256 burned) internal view returns (uint256) {
         uint8 dec = 18;
         (bool ok, bytes memory ret) = token.staticcall(abi.encodeWithSignature("decimals()"));
         if (ok && ret.length >= 32) dec = abi.decode(ret, (uint8));
-        uint256 human = burned / (10 ** dec);
-        uint256 lg = Math.log10(human + 1);
-        uint256 k = lg * KARMA_SCALE;
-        return k < KARMA_SCALE ? KARMA_SCALE : k;
+        return Math.log10(burned / (10 ** dec) + 1) * KARMA_SCALE;
     }
 
     // ------------------------------------------------------------ epoch lifecycle
 
+    /// @dev A full bar never seals before minEpochDuration; it only pulls the clock down to it.
+    function _onTarget() internal {
+        uint256 minEnd = epochStartedAt + minEpochDuration;
+        if (block.timestamp < minEnd) {
+            if (epochEndsAt > minEnd) epochEndsAt = minEnd;
+        } else if (treasury() >= minTreasury) {
+            _seal();
+        }
+    }
+
+    /// @notice Seals the epoch once the clock has run out. A treasury below minTreasury
+    ///         extends the epoch instead, so altar fees keep accumulating toward the minimum.
     function seal() external {
         if (phase != Phase.Burning || block.timestamp < epochEndsAt) revert NotSealable();
+        if (treasury() < minTreasury) {
+            epochEndsAt = block.timestamp + minEpochDuration;
+            emit Extended(epoch, epochEndsAt);
+            return;
+        }
         _seal();
     }
 
@@ -197,14 +222,13 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         emit Sealed(epoch, soulWeight, totalKarmaOf[epoch]);
     }
 
-    function rebirth() external onlyKeeper nonReentrant {
+    function rebirth(uint256 buybackMinOut) external onlyKeeper nonReentrant {
         if (phase != Phase.Evaluating) revert WrongPhase();
         if (address(reincarnator) == address(0) || address(buyback) == address(0)) revert ExecutorsUnset();
-        phase = Phase.Rebirth;
 
-        uint256 treasury = address(this).balance - reserved;
-        uint256 protocolCut = (treasury * protocolBps) / BPS;
-        uint256 rest = treasury - protocolCut;
+        uint256 pot = treasury();
+        uint256 protocolCut = (pot * protocolBps) / BPS;
+        uint256 rest = pot - protocolCut;
         uint256 feeShare = (rest * feeShareBps) / BPS;
         uint256 seedAmt = (rest * seedBps) / BPS;
         uint256 buybackAmt = rest - feeShare - seedAmt;
@@ -228,21 +252,42 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         }
         rebornToken[e] = newToken;
 
-        if (buybackAmt > 0) {
-            try buyback.execute{value: buybackAmt}() {} catch {
-                feePoolOf[e] += buybackAmt;
-                buybackAmt = 0;
-            }
-        }
+        buybackReserve += buybackAmt;
+        uint256 bought = _runBuyback(buybackMinOut);
 
         reserved += feePoolOf[e];
-        emit Reborn(e, newToken, feePoolOf[e], seedAmt, buybackAmt, protocolCut);
+        emit Reborn(e, newToken, feePoolOf[e], seedAmt, bought, protocolCut);
 
         epoch = e + 1;
         soulWeight = 0;
         soulTarget = (soulTarget * targetGrowthBps) / BPS;
+        epochStartedAt = block.timestamp;
         epochEndsAt = block.timestamp + epochDuration;
         phase = Phase.Burning;
+    }
+
+    /// @notice Retries the buyback with the accumulated reserve, e.g. once a route exists.
+    function runBuyback(uint256 minTokensOut) external onlyKeeper nonReentrant {
+        _runBuyback(minTokensOut);
+    }
+
+    /// @dev A failed buyback keeps its ETH in buybackReserve; it is never merged into fee share.
+    function _runBuyback(uint256 minTokensOut) internal returns (uint256 spent) {
+        uint256 amt = buybackReserve;
+        if (amt == 0) return 0;
+        buybackReserve = 0;
+        try buyback.execute{value: amt}(minTokensOut) {
+            return amt;
+        } catch {
+            buybackReserve = amt;
+            return 0;
+        }
+    }
+
+    /// @notice Pulls creator revenue credited to this contract by Pons. Anyone may call.
+    function collect() external {
+        if (feeEscrow.balanceOf(address(this)) == 0) return;
+        feeEscrow.claim();
     }
 
     // ------------------------------------------------------------ fee share
@@ -268,8 +313,9 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         emit Claimed(msg.sender, owed, from, to);
     }
 
-    function treasury() external view returns (uint256) {
-        return address(this).balance - reserved;
+    /// @notice ETH available for the next rebirth split.
+    function treasury() public view returns (uint256) {
+        return address(this).balance - reserved - buybackReserve;
     }
 
     function soulOf(address wallet) external view returns (uint256) {
@@ -298,28 +344,38 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
 
     function setParams(
         uint256 _altarFee,
-        uint256 _baseKarma,
-        uint256 _baseCapPerWallet,
+        uint256 _verifiedKarma,
+        uint256 _unverifiedKarma,
+        uint256 _unverifiedCap,
         uint256 _maxClockBonusPerWallet,
+        uint256 _minEpochDuration,
         uint256 _epochDuration,
+        uint256 _minTreasury,
         uint256 _targetGrowthBps
     ) external onlyOwner notFrozen {
+        require(_unverifiedCap < _verifiedKarma && _minEpochDuration <= _epochDuration, "params");
         altarFee = _altarFee;
-        baseKarma = _baseKarma;
-        baseCapPerWallet = _baseCapPerWallet;
+        verifiedKarma = _verifiedKarma;
+        unverifiedKarma = _unverifiedKarma;
+        unverifiedCap = _unverifiedCap;
         maxClockBonusPerWallet = _maxClockBonusPerWallet;
+        minEpochDuration = _minEpochDuration;
         epochDuration = _epochDuration;
+        minTreasury = _minTreasury;
         targetGrowthBps = _targetGrowthBps;
         emit ConfigSet("altarFee", _altarFee);
-        emit ConfigSet("baseKarma", _baseKarma);
-        emit ConfigSet("baseCapPerWallet", _baseCapPerWallet);
+        emit ConfigSet("verifiedKarma", _verifiedKarma);
+        emit ConfigSet("unverifiedKarma", _unverifiedKarma);
+        emit ConfigSet("unverifiedCap", _unverifiedCap);
         emit ConfigSet("maxClockBonusPerWallet", _maxClockBonusPerWallet);
+        emit ConfigSet("minEpochDuration", _minEpochDuration);
         emit ConfigSet("epochDuration", _epochDuration);
+        emit ConfigSet("minTreasury", _minTreasury);
         emit ConfigSet("targetGrowthBps", _targetGrowthBps);
     }
 
     function setSplit(uint16 _protocolBps, uint16 _feeShareBps, uint16 _seedBps, uint16 _buybackBps) external onlyOwner notFrozen {
-        require(_protocolBps <= BPS && uint256(_feeShareBps) + _seedBps + _buybackBps == BPS, "split");
+        require(_protocolBps <= 3000 && uint256(_feeShareBps) + _seedBps + _buybackBps == BPS, "split");
         protocolBps = _protocolBps;
         feeShareBps = _feeShareBps;
         seedBps = _seedBps;
@@ -334,9 +390,5 @@ contract ThanatosAltarV2 is EIP712, ReentrancyGuard {
         if (address(reincarnator) == address(0) || address(buyback) == address(0)) revert ExecutorsUnset();
         frozen = true;
         emit Frozen();
-    }
-
-    function voucherDigest(address token, uint16 multBps, uint64 expiry) external view returns (bytes32) {
-        return _hashTypedDataV4(keccak256(abi.encode(VOUCHER_TYPEHASH, token, multBps, expiry, block.chainid, address(this))));
     }
 }

@@ -58,7 +58,7 @@ export function RebirthOverlay() {
           <div className="mt-1 text-sm text-bone/60">{show.name}</div>
           {airdropped && (
             <div className="mt-4 border border-flame/50 bg-flame/10 px-3 py-2 text-xs text-flame">
-              You burned this epoch. If you are in the top 50, your ${show.symbol} airdrop is claimable below once the merkle root is set.
+              You burned this epoch. Your share of the ${show.symbol} seed buy is claimable below.
             </div>
           )}
           <a

@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /// @title FounderSplitter
 /// @notice Pull-based 50/50 ETH splitter between two founder wallets. Never reverts on receive,
-///         so a broken payee can never block Altar rebirths (M-15).
+///         so a broken payee can never block Altar rebirths.
 contract FounderSplitter {
     address public immutable a;
     address public immutable b;

@@ -23,16 +23,20 @@ holder's Pons profile. No team wallet, no protocol cut.
 1. **Burn**: users call `sacrifice()` with a 0.0005 ETH altar fee. The token is transferred straight to
    `0x…dEaD`; the contract measures the balance delta, so fake and fee-on-transfer tokens cannot inflate it.
 2. **Karma (on-chain)**: a verifier service checks the token once had a market and is now < 5% of peak,
-   then signs a 1-hour EIP-712 voucher. Verified burns earn `max(1, log10(amount+1)) × 1.5` (dead) or `× 1.0`
-   (alive) and extend the clock (max +30 min per wallet per epoch). Unverified burns earn a flat 38 karma,
-   capped at 380 per wallet per epoch, and never move the clock.
-3. **Seal**: when the clock expires (anyone can call `seal()`) or the target is hit, the epoch seals.
+   then signs a 1-hour EIP-712 voucher. Verified burns earn `(38 + log10(amount+1)) × 1.5` (dead) or `× 1.0`
+   (alive) and extend the clock (max +30 min per wallet per epoch). Unverified burns earn 5 karma, capped at
+   25 per wallet per epoch, and never move the clock. One verified burn always outweighs the unverified cap.
+3. **Seal**: when the clock expires anyone can call `seal()`. A full soul bar shortens the clock but never
+   below 6 h from the epoch start. If the treasury is below 0.01 ETH the epoch is extended by 6 h instead.
 4. **Rebirth**: the keeper stages LLM-generated metadata on the Reincarnator and calls `rebirth()`. The
    Altar splits its treasury: **20% protocol** (50/50 founder pull-splitter), then **30% fee-share pool /
    40% seed / 30% $THANATOS buyback-burn**. Seed goes to the Reincarnator, whose only target is the Pons v2
    forwarder (`launchAndBuy`, ETH pair, `creatorFeeRecipient = Altar`, 2% tax); bought tokens stay in the
-   Reincarnator for a merkle airdrop to the top 50 by epoch karma.
-5. **Fee share**: `claimable()` sums per-epoch pools by the wallet's epoch karma; `claim()` pays ETH.
+   Reincarnator and every burner claims a pro-rata share by epoch karma. A buyback that cannot execute
+   (no route yet, or a graduated curve) keeps its ETH in `buybackReserve` for a later `runBuyback()`.
+5. **Creator fees**: Pons credits creator revenue to its fee escrow; `collect()` (anyone) pulls it into the
+   treasury. The keeper calls it every minute.
+6. **Fee share**: `claimable()` sums per-epoch pools by the wallet's epoch karma; `claim()` pays ETH.
    A later epoch can never spend an earlier pool.
 
 Amounts depend on activity and may be zero.
@@ -51,14 +55,17 @@ Amounts depend on activity and may be zero.
 |                          EVM chain (Robinhood Chain)                         |
 |                                                                              |
 |  ThanatosAltarV2 ---- sacrifice() -> token to 0x...dEaD, karma on-chain      |
-|     | seal() [anyone]  rebirth() [keeper]  claim() [anyone]                  |
+|     | seal() collect() claim() [anyone]  rebirth() runBuyback() [keeper]     |
 |     | treasury split: 20% -> FounderSplitter (pull, 50/50)                   |
 |     |                 30% -> feePoolOf[epoch]                                |
 |     |                 40% -> Reincarnator.seed()  -> Pons forwarder          |
-|     |                 30% -> Buyback.execute()    -> Pons curve -> dEaD      |
+|     |                 30% -> Buyback.execute()    -> route -> dEaD           |
+|     |                        (or buybackReserve until a route works)         |
 |     v                                                                        |
-|  Reincarnator: stage() [keeper] . launchAndBuy (fixed target) . merkle claim |
-|  Buyback:      route set once, then frozen                                   |
+|  Reincarnator: stage() [keeper] . launchAndBuy (fixed target) . pro-rata     |
+|                airdrop claim by epoch karma                                  |
+|  Buyback:      route changes take effect 48 h after proposeRoute()           |
+|  Pons escrow:  creator fees credited here -> Altar.collect()                 |
 +-------------|----------------------------------------------------------------+
               | Offering / Sealed / Reborn / Claimed events (never computed off-chain)
               v
@@ -66,8 +73,8 @@ Amounts depend on activity and may be zero.
 |  Workers (1-min cron)                                                        |
 |   eventIndexer   mirrors events -> /sacrifices /leaderboard /epochs /claims  |
 |                  refreshes /altar_state cache from contract views            |
-|   epochDaemon    seal -> stage (LLM) -> rebirth -> merkle root               |
-|                  WAITING_FOR_TREASURY when seed < Pons launchFee             |
+|   epochDaemon    collect -> seal (or extend) -> stage (LLM) -> rebirth       |
+|                  retries a reserved buyback once a route is live             |
 |   voucher (HTTP) EIP-712 deadness voucher signed by the VERIFIER key         |
 |  Keys: owner (cold, deploy+freeze) . keeper (agent) . verifier - all separate |
 +------------------------------+-----------------------------------------------+
@@ -83,9 +90,10 @@ Amounts depend on activity and may be zero.
 
 ```
 burned      = balanceOf(dEaD) after - before          // fake / fee-on-transfer safe
-verified    = max(1, log10(burned / 10^decimals + 1)) x multBps/10000   // 1.5 dead, 1.0 alive
-unverified  = 38 per burn, capped at 380 per wallet per epoch
+verified    = (38 + log10(burned / 10^decimals + 1)) x multBps/10000   // 1.5 dead, 1.0 alive
+unverified  = 5 per burn, capped at 25 per wallet per epoch
 clock bonus = verified karma x 1 min, capped at 30 min per wallet per epoch
+airdrop     = seed tokens x karmaOf[epoch][wallet] / totalKarmaOf[epoch]
 ```
 
 ### Fee share
@@ -100,6 +108,8 @@ claimable(w) = sum over past epochs e of  feePoolOf[e] x karmaOf[e][w] / totalKa
 | 1     | 6 h      | 1000 karma |
 | n+1   | 24 h (contract param, frozen after setup) | previous x 1.25 |
 
+Minimum epoch length 6 h; minimum treasury to seal 0.01 ETH (otherwise +6 h).
+
 ---
 
 ## Repository layout
@@ -109,7 +119,7 @@ thanatos/
 |-- thanatos-frontend/          Next.js . Tailwind . wagmi v2 . RainbowKit . Zustand
 |   |-- src/app/                layout, dashboard page, /whitepaper
 |   |-- src/components/         Header, Hero, MetricStrip, IncineratorForm, NecroPitCanvas,
-|   |                           TelemetryTerminal, HowItWorks, Leaderboard, FeeShareVault, AirdropClaim,
+|   |                           TelemetryTerminal, HowItWorks, Leaderboard, FeeShareVault, AirdropClaim (on-chain),
 |   |                           Reincarnations, RebirthOverlay
 |   |-- src/hooks/              useAltarState (contract views), useSacrificeLogs (event cache), useFeeShareClaim
 |   |-- src/config/             wagmi chain, contract ABIs, DB client
@@ -121,7 +131,7 @@ thanatos/
     |-- scripts/                deployContracts.ts (Hardhat)
     |-- functions/src/
     |   |-- index.ts            eventIndexer, epochEvaluationDaemon, voucher, indexNow (IAM), refreshState (IAM)
-    |   |-- workers/            indexer (event mirror), epochDaemon (seal/stage/rebirth/merkle)
+    |   |-- workers/            indexer (event mirror), epochDaemon (collect/seal/stage/rebirth/buyback)
     |   |-- services/           voucher (EIP-712), dexMetrics, aiLoreService, twitterService
     |   |-- utils/              math (tiers, sanitizer)
     |   `-- config/             constants (ABIs, addresses), clients (RPCs, keys), DB admin client
@@ -135,13 +145,12 @@ thanatos/
 
 | Path | Written by | Purpose |
 |------|-----------|---------|
-| `altar_state/current` | indexer / daemon | cache of contract views + daemon `status` (`DORMANT`, `BURNING`, `WAITING_FOR_TREASURY`, `STAGING`, `SEALED`, `REBORN`, `ERROR`) |
+| `altar_state/current` | indexer / daemon | cache of contract views + daemon `status` (`DORMANT`, `BURNING`, `EXTENDED`, `SEALED`, `STAGING`, `REBORN`) |
 | `altar_state/indexer_cursor` | indexer | `last_block` (starts at `ALTAR_DEPLOY_BLOCK`) |
 | `sacrifices/{tx-logIndex}` | indexer | mirror of `Offering` |
 | `leaderboard/{wallet}` | indexer | `lifetime_karma`, `epoch_karma.{n}`, `burn_count`, `tier` |
-| `epochs/{n}` | indexer | mirror of `Sealed` + `Reborn` |
-| `reincarnations/{n}` | daemon + indexer | staged name/symbol, token address, merkle root |
-| `airdrops/{n}_{wallet}` | daemon | amount + merkle proof for `claimAirdrop` |
+| `epochs/{n}` | indexer | mirror of `Sealed`, `Extended`, `Reborn` |
+| `reincarnations/{n}` | daemon + indexer | staged name/symbol, token address |
 | `claims/{tx-logIndex}` | indexer | mirror of `Claimed` |
 ---
 
@@ -174,8 +183,9 @@ npm run deploy:contracts        # deploys + verifies on Blockscout, prints addre
 ```
 
 Deploy order (see `scripts/deployContracts.ts`): FounderSplitter → AltarV2 → Reincarnator → Buyback →
-`setExecutors`. After $THANATOS exists: `Buyback.setRoute(token, curve)` then `Buyback.freeze()`.
-After one successful mainnet test epoch: `Altar.freeze()` (owner) and `Reincarnator.freeze()` (keeper).
+`setExecutors`. After $THANATOS exists: `Buyback.proposeRoute(curve)`, then `applyRoute()` 48 h later
+(after graduation, propose a route contract that swaps through the Uniswap v4 pool with the same
+`buy(quoteIn, minOut, recipient)` signature). After one successful mainnet test epoch: `Altar.freeze()`.
 
 ### 2. Backend workers
 
@@ -229,11 +239,15 @@ npx tsx src/services/twitterService.ts  # posts a test tweet (dry-runs without t
 
 - Sacrificed tokens go directly to `0x…dEaD`; the Altar never custodies them and has no token-moving function.
 - Karma is computed on-chain from the measured burn. Off-chain services only mirror events or sign vouchers.
-- Three separate keys: **owner** (cold wallet; deploys, sets executors, calls `freeze()`), **keeper**
-  (`seal`, `stage`, `rebirth`, `setMerkleRoot`), **verifier** (signs vouchers). The keeper cannot move ETH
-  or tokens. The deploy script refuses to run if deployer == keeper.
-- `rebirth()` sends ETH only to the three executors stored in the Altar; the Reincarnator's Pons target
-  and the Buyback route are immutable/frozen. There is no arbitrary-call function.
+- Three separate keys: **owner** (cold wallet; deploys, sets executors, proposes buyback routes, calls
+  `freeze()`), **keeper** (`collect`, `seal`, `stage`, `rebirth`, `runBuyback`), **verifier** (signs
+  vouchers). The keeper cannot move ETH or tokens; airdrop shares are computed on-chain. The deploy script
+  refuses to run if deployer == keeper.
+- `rebirth()` sends ETH only to the three executors stored in the Altar; the Reincarnator's Pons target is
+  immutable and a Buyback route change is visible on-chain 48 h before it applies. There is no
+  arbitrary-call function. A buyback that cannot execute keeps its ETH in `buybackReserve`.
+- Epochs never seal before 6 h or with less than 0.01 ETH in the treasury, so a full soul bar cannot be
+  used to force a snap rebirth, and an empty treasury extends the epoch instead of stalling it.
 - Per-epoch fee pools with a reserved balance; a claim can never draw from another epoch or from the treasury.
 - All setters emit events and are disabled by a one-way `freeze()`; until frozen, changes are visible on-chain.
 - Fake ERC-20s, fee-on-transfer and rebasing tokens are rejected or credited only for the measured delta.
@@ -249,6 +263,7 @@ npx tsx src/services/twitterService.ts  # posts a test tweet (dry-runs without t
 | Factory | `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e` (`launchToken`, `previewLaunchEconomics`, `TokenLaunched`) |
 | Launch config | `0`: 1B supply, 1% curve fee, 4.2 ETH graduation into a locked Uniswap v4 pool |
 | Forwarder | `0xe33E9E479dF8802cb0866d5d05258bEc4cF62948` (`launchAndBuy`) - the only target the Reincarnator can call |
+| Fee escrow | `0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e` - creator revenue is credited here; `Altar.collect()` claims it |
 | Pair token | native ETH (`0x0`). Not WETH, not `0xd060…` (that is the NVDA stock token) |
 | Creator tax | 200 bps (2%) on all Thanatos tokens; protocol cap is 1000 bps |
 | $THANATOS fee recipient | Pons Holder Fee Sharing (holders claim from Pons profile) |
@@ -260,9 +275,11 @@ Reincarnations panel links there and the rebirth overlay shows a "Trade on Pons"
 
 ## Status / known gaps
 
-- Contracts are unaudited. Hardhat suite covers C-1..C-5, H-8, H-9, H-11, M-12, M-15, M-16 from the 2026-09-16 audit.
-- Pons curve `buy(minOut, recipient)` selector for the Buyback route must be confirmed against the live
-  $THANATOS curve before `setRoute`; a wrong route reverts and the ETH falls back to the epoch fee pool.
+- Contracts are unaudited. The Hardhat suite covers burn accounting, vouchers, karma caps, epoch timing,
+  treasury floor, splits, fee-share pools, buyback reserve, escrow collection, pro-rata airdrops and freeze.
+- Post-graduation buybacks need a route contract for the Uniswap v4 pool (`buy(quoteIn, minOut, recipient)`);
+  until it is proposed and applied, buyback ETH accumulates in `buybackReserve`.
+- A keeper-supplied `minOut` protects buybacks; the daemon quotes the route with a simulated buy and passes 97%.
 - Twitter posting requires an X API plan with write credits.
 - Voucher endpoint should sit behind a rate limiter (Cloud Armor / hosting rewrite).
 ## License

@@ -44,6 +44,7 @@ contract MockPonsForwarder {
     address public lastPair;
     address public lastFeeRecipient;
     uint16 public lastTax;
+    uint256 public lastValue;
     function launchAndBuy(TokenParams calldata p, uint256, address pairToken, uint256 quoteIn, uint256, address recipient, address[] calldata)
         external payable returns (address token, address curve, uint256 tokensOut)
     {
@@ -51,6 +52,7 @@ contract MockPonsForwarder {
         lastPair = pairToken;
         lastFeeRecipient = p.creatorFeeRecipient;
         lastTax = p.creatorTaxBps;
+        lastValue = msg.value;
         lastToken = new MockERC20(p.name, p.symbol, 18);
         tokensOut = quoteIn * 1_000_000;
         lastToken.mint(recipient, tokensOut);
@@ -58,12 +60,28 @@ contract MockPonsForwarder {
     }
 }
 
+/// Pons v2 curve signature: buy(quoteIn, minTokensOut, recipient)
 contract MockCurve {
     MockERC20 public token;
     constructor(address t) { token = MockERC20(t); }
-    function buy(uint256, address recipient) external payable returns (uint256 out) {
+    function buy(uint256 quoteIn, uint256 minTokensOut, address recipient) external payable returns (uint256 out) {
+        require(msg.value == quoteIn, "value");
         out = msg.value * 1000;
+        require(out >= minTokensOut, "slippage");
         token.mint(recipient, out);
+    }
+}
+
+/// Pons v2 fee escrow: credit(recipient) then claim() by the recipient
+contract MockEscrow {
+    mapping(address => uint256) public balanceOf;
+    function credit(address recipient) external payable { balanceOf[recipient] += msg.value; }
+    function claim() external returns (uint256 amount) {
+        amount = balanceOf[msg.sender];
+        require(amount > 0, "NoBalance");
+        balanceOf[msg.sender] = 0;
+        (bool ok, ) = msg.sender.call{value: amount}("");
+        require(ok);
     }
 }
 

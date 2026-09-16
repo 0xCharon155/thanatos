@@ -9,7 +9,7 @@ const STEPS = [
   {
     Icon: Flame,
     title: "BURN DEAD TOKENS",
-    body: "Send worthless or rugged ERC-20s to the Altar. Soul weight scales with log10 of the amount, x1.5 if the token has no DEX volume.",
+    body: "Send worthless or rugged ERC-20s to the Altar. A verified-dead burn earns 38 karma x1.5 plus a log-scaled amount bonus. Unverified burns earn a small capped amount.",
   },
   {
     Icon: Crown,
@@ -19,7 +19,7 @@ const STEPS = [
   {
     Icon: Gift,
     title: "INHERIT THE REBIRTH",
-    body: "When the clock hits zero or the target is reached, a new token launches on Pons. Top 50 by epoch karma can claim the airdrop.",
+    body: "When the clock hits zero (never before 6 h) a new token launches on Pons. Every burner claims a share of the seed buy, pro-rata by epoch karma.",
   },
   {
     Icon: Coins,
@@ -81,7 +81,7 @@ export function HowItWorks() {
         ))}
       </div>
       <p className="mt-4 text-center text-[10px] tracking-[0.15em] text-bone/30">
-        NO PRESALE · NO TEAM ALLOCATION · LOCKED LIQUIDITY · 0.0005 ETH ALTAR FEE PER BURN · SOUL TARGET GROWS 1.25x EACH REBIRTH
+        NO PRESALE · NO TEAM ALLOCATION · LOCKED LIQUIDITY · 0.0005 ETH ALTAR FEE PER BURN · EPOCHS LAST AT LEAST 6 H · SOUL TARGET GROWS 1.25x EACH REBIRTH
       </p>
     </section>
   );
