@@ -6,7 +6,15 @@ const client = () => {
   return new TwitterApi({ appKey: k, appSecret: s, accessToken: t, accessSecret: ts });
 };
 
+let lastTweetAt = 0;
+const MIN_GAP_MS = 60_000;
+
 export async function tweet(text: string): Promise<void> {
+  if (Date.now() - lastTweetAt < MIN_GAP_MS) {
+    console.log("[tweet:rate-limited]", text.slice(0, 60));
+    return;
+  }
+  lastTweetAt = Date.now();
   const c = client();
   if (!c) {
     console.log("[tweet:dry-run]", text);

@@ -1,33 +1,50 @@
 "use client";
-import { useEffect } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/config/firebase";
-import { useThanatosStore } from "@/store/useThanatosStore";
+import { useReadContracts } from "wagmi";
+import { formatEther } from "viem";
+import { ALTAR_ADDRESS, altarAbi, IS_DEPLOYED } from "@/config/contracts";
 
-const toMs = (v: unknown) =>
-  typeof v === "number" ? (v < 1e12 ? v * 1000 : v) : ((v as { toMillis?: () => number })?.toMillis?.() ?? Date.now());
+export type AltarState = {
+  deployed: boolean;
+  epoch: number;
+  phase: 0 | 1 | 2;
+  epochEndsAt: number;
+  soulWeight: number;
+  soulTarget: number;
+  treasuryEth: number;
+  totalDistributedEth: number;
+  altarFeeWei: bigint;
+  loading: boolean;
+};
 
-export function useAltarState() {
-  const setAltar = useThanatosStore((s) => s.setAltar);
-  useEffect(() => {
-    return onSnapshot(
-      doc(db, "altar_state", "current"),
-      (snap) => {
-        const d = snap.data();
-        if (!d) return;
-        setAltar({
-          epoch: d.reincarnation_epoch ?? 1,
-          status: d.is_locked ? "EPOCH_EVALUATING" : "ACTIVE_BURNING",
-          deathClockEnd: toMs(d.death_clock_ends_at),
-          soulWeightCurrent: Number(d.soul_weight_current ?? 0),
-          soulWeightTarget: Number(d.soul_weight_target ?? 1000),
-          treasuryEth: Number(d.accumulated_rebirth_eth ?? 0),
-          dividendEth: Number(d.accumulated_dividend_eth ?? 0),
-          totalSacrifices: d.total_sacrifices ?? 0,
-        });
-      },
-      () => {},
-    );
-  }, [setAltar]);
-  return useThanatosStore((s) => s.altar);
+const c = { address: ALTAR_ADDRESS, abi: altarAbi } as const;
+const K = 1e18;
+
+/** All numbers come from contract views (◆ on-chain). Firestore is not consulted here. */
+export function useAltarState(): AltarState {
+  const { data, isLoading } = useReadContracts({
+    contracts: [
+      { ...c, functionName: "epoch" },
+      { ...c, functionName: "phase" },
+      { ...c, functionName: "epochEndsAt" },
+      { ...c, functionName: "soulWeight" },
+      { ...c, functionName: "soulTarget" },
+      { ...c, functionName: "treasury" },
+      { ...c, functionName: "totalDistributed" },
+      { ...c, functionName: "altarFee" },
+    ],
+    query: { enabled: IS_DEPLOYED, refetchInterval: 12_000 },
+  });
+  const r = (i: number) => data?.[i]?.result as bigint | number | undefined;
+  return {
+    deployed: IS_DEPLOYED,
+    epoch: Number(r(0) ?? 0),
+    phase: Number(r(1) ?? 0) as 0 | 1 | 2,
+    epochEndsAt: Number(r(2) ?? 0) * 1000,
+    soulWeight: Number(r(3) ?? 0n) / K,
+    soulTarget: Number(r(4) ?? 0n) / K,
+    treasuryEth: Number(formatEther((r(5) as bigint) ?? 0n)),
+    totalDistributedEth: Number(formatEther((r(6) as bigint) ?? 0n)),
+    altarFeeWei: (r(7) as bigint) ?? 0n,
+    loading: IS_DEPLOYED && isLoading,
+  };
 }

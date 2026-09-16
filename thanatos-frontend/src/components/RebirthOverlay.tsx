@@ -31,8 +31,8 @@ export function RebirthOverlay() {
   }, [rows]);
 
   if (!show) return null;
-  const rank = board.findIndex((b) => b.wallet.toLowerCase() === address?.toLowerCase());
-  const airdropped = rank >= 0 && rank < 50;
+  const mine = board.find((b) => b.wallet.toLowerCase() === address?.toLowerCase());
+  const airdropped = !!mine && mine.epochKarma > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/90">
@@ -58,7 +58,7 @@ export function RebirthOverlay() {
           <div className="mt-1 text-sm text-bone/60">{show.name}</div>
           {airdropped && (
             <div className="mt-4 border border-flame/50 bg-flame/10 px-3 py-2 text-xs text-flame">
-              You ranked #{rank + 1} this epoch. ${show.symbol} has been airdropped to your wallet.
+              You burned this epoch. If you are in the top 50, your ${show.symbol} airdrop is claimable below once the merkle root is set.
             </div>
           )}
           <a

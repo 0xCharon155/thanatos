@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Code2 } from "lucide-react";
 
@@ -26,14 +26,13 @@ export default function Whitepaper() {
         <Image src="/logo.png" alt="" width={72} height={72} className="drop-shadow-[0_0_20px_#dc2626]" />
         <div>
           <h1 className="text-3xl font-bold tracking-[0.2em] text-bone">$THANATOS</h1>
-          <div className="text-[10px] tracking-[0.3em] text-bone/40">WHITEPAPER - v1.1 - ROBINHOOD CHAIN</div>
+          <div className="text-[10px] tracking-[0.3em] text-bone/40">WHITEPAPER · v2.0 · ROBINHOOD CHAIN</div>
         </div>
       </div>
 
       <P>
         <br />
-        <strong className="text-bone">One sentence:</strong> burn tokens that are already worthless, earn permanent Karma, and get paid
-        in ETH and in every new token the protocol creates from the ashes.
+        <strong className="text-bone">One sentence:</strong> burn tokens that are already worthless, earn karma scored on-chain, and receive a share of protocol fees in ETH plus every new token the protocol creates from the ashes. Amounts depend on activity and may be zero.
       </P>
 
       <H n="01">THE PROBLEM</H>
@@ -57,9 +56,7 @@ export default function Whitepaper() {
         <div className="panel border-l-2 border-flame p-4">
           <div className="mb-2 text-[10px] tracking-[0.25em] text-flame">REBIRTH TOKENS - ONE PER EPOCH</div>
           <p className="text-xs leading-relaxed text-bone/60">
-            Created automatically at the end of each epoch from the most-burned dead tokens. Their creator fees flow into the
-            ThanatosFeeSplitter and are divided 30 / 40 / 30: ETH dividends for burners by Karma, treasury for the next launch,
-            and protocol operations. Top 50 burners of the epoch are airdropped the new token.
+            Created automatically at the end of each epoch from the most-burned dead tokens. Their creator fees and every altar fee flow into the Altar treasury. At rebirth: 20% protocol, then the rest splits 30% fee share for burners / 40% seed for the next launch / 30% buyback-and-burn of $THANATOS. Top 50 burners of the epoch can claim the new token.
           </p>
         </div>
       </div>
@@ -67,32 +64,31 @@ export default function Whitepaper() {
       <H n="03">HOW AN EPOCH WORKS</H>
       <P>The protocol runs in rounds called epochs. Each epoch has a countdown (the death clock) and a goal (the soul target).</P>
       <Box>
-        1. You send a dead token to the Altar contract. It is locked forever.<br />
-        2. The burn is scored as <span className="text-flame">soul weight</span>. Bigger burns and deader tokens score higher.<br />
-        3. Your soul weight is added to the epoch total and to your permanent <span className="text-flame">Karma</span>.<br />
-        4. Every burn adds minutes to the death clock, extending the round.<br />
-        5. When the clock hits zero OR the soul target is reached, the epoch ends.<br />
-        6. The protocol names and launches a new token on Pons from its own treasury.<br />
-        7. The top 50 burners of that epoch receive the new token as an airdrop.<br />
+        1. You send a dead token to the Altar with a 0.0005 ETH altar fee. The token goes straight to 0x…dEaD.<br />
+        2. The contract measures what actually arrived and scores it as <span className="text-flame">karma</span> on-chain.<br />
+        3. Verified-dead tokens (voucher from the verifier) earn log-scaled karma ×1.5 and extend the clock (max +30 min per wallet per epoch).<br />
+        4. Unverified tokens earn a flat base karma, capped per wallet per epoch, and never move the clock.<br />
+        5. When the clock hits zero OR the soul target is reached, the epoch seals. Anyone can call seal().<br />
+        6. The keeper stages a name from the ashes and calls rebirth(): the contract splits the treasury and launches on Pons.<br />
+        7. The top 50 burners by epoch karma claim the new token via a merkle airdrop.<br />
         8. A new epoch begins with a fresh clock and a 25% higher target.
       </Box>
 
       <H n="04">SOUL WEIGHT (HOW BURNS ARE SCORED)</H>
-      <P>The score grows with the logarithm of the amount, so dumping a billion units of dust does not give a billion points, but every
-        burn is worth at least 1 point. Tokens with zero trading activity get a 50% bonus, because they are truly dead.</P>
+      <P>Karma is computed by the Altar contract from the amount that actually landed at 0x…dEaD. A verifier service checks the token had a real market once and is now below 5% of its peak, then signs a short-lived EIP-712 voucher. Freshly minted junk has no history, gets no voucher, and is capped.</P>
       <Box>
-        weight = max(1, log10(amount + 1) x bonus)<br />
-        bonus  = 1.5 if the token has no DEX volume, otherwise 1.0<br />
+        verified:   karma = max(1, log10(amount + 1)) × mult    mult = 1.5 dead · 1.0 alive<br />
+        unverified: karma = 38 per burn, max 380 per wallet per epoch, no clock bonus<br />
         <br />
-        Examples: 1,000 tokens = 3 SW / 1,000,000 = 6 SW / 1,000,000,000 = 9 SW / dead bonus x1.5
+        Examples (verified dead): 1,000 tokens = 4.5 · 1,000,000 = 9 · 1,000,000,000 = 13.5 karma
       </Box>
 
       <H n="05">THE FOUR REWARDS</H>
       <div className="grid gap-4 md:grid-cols-2">
         {[
           ["HOLD $THANATOS", "Receive your pro-rata share of 2.7% of all $THANATOS trading volume, paid by Pons Holder Fee Sharing. Claim any time from your Pons profile."],
-          ["BURN FOR KARMA", "Every dead token you sacrifice raises your Karma forever. Karma decides your share of rebirth-token fee dividends, paid in ETH from the Thanatos vault."],
-          ["AIRDROP", "Each epoch's new token is distributed to the top 50 wallets by epoch Karma, proportional to their share. Burn more that round, receive more."],
+          ["BURN FOR KARMA", "Epoch karma decides your fee share and airdrop for that round. Lifetime karma sets your tier. Both are read from on-chain events."],
+          ["AIRDROP", "The seed buy of each new token is held by the Reincarnator contract. Top 50 by epoch karma claim it pro-rata with a merkle proof."],
           ["RANK & TIER", "Top 3 are Arch-Necromancers, top 10 Soul Reapers, top 50 Acolytes. Tiers show on the leaderboard and are reserved for future weighting."],
         ].map(([t, b]) => (
           <div key={t} className="panel p-4">
@@ -108,46 +104,46 @@ export default function Whitepaper() {
       <Box>
         $THANATOS:     2.7% of volume -&gt; all holders, pro-rata (Pons Holder Fee Sharing)<br />
         <br />
-        Rebirth tokens: 2.7% of volume -&gt; ThanatosFeeSplitter<br />
-        &nbsp;&nbsp;30% -&gt; Dividend vault (ETH, claimable by burners by Karma share)<br />
-        &nbsp;&nbsp;40% -&gt; Rebirth treasury (seeds the next launch, so the loop never runs dry)<br />
-        &nbsp;&nbsp;30% -&gt; Protocol (infrastructure, gas for the autonomous agent, bots)
+        Rebirth tokens: 2.7% of volume + 0.0005 ETH per burn -&gt; Altar treasury<br />
+        &nbsp;&nbsp;20% -&gt; Protocol (two founder wallets, 50/50, on-chain pull splitter)<br />
+        &nbsp;&nbsp;80% split at rebirth:<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;30% -&gt; Fee-share pool for that epoch (ETH, claimable by epoch karma)<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;40% -&gt; Seed: launch fee + initial buy of the next token (airdropped)<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;30% -&gt; Buyback of $THANATOS, burned to 0x…dEaD
       </Box>
-      <P>Example: $100k of daily volume on rebirth tokens sends $2,700 to the splitter: $810 to burners, $1,080 to the treasury, $810 to
-        the protocol. Because the 40% is reinvested, each rebirth funds the next.</P>
+      <P>Example: $2,700 of fees in an epoch → $540 protocol, then $648 fee share, $864 seed, $648 buyback. Because the seed is reinvested, each rebirth funds the next. If the treasury cannot cover the Pons launch fee, the epoch waits and the site shows it.</P>
 
-      <H n="07">WHY IT IS TRUSTLESS</H>
+      <H n="07">WHAT THE CODE GUARANTEES</H>
       <Box>
-        - Burned tokens are locked in the Altar contract. Nobody, including the deployer, can withdraw them.<br />
-        - $THANATOS fees go to holders through Pons' own contracts. Thanatos never touches them.<br />
-        - Rebirth fee splitting is enforced by the FeeSplitter contract and cannot be redirected after the fact.<br />
-        - Dividend claims are computed on-chain from Karma set by the agent after each epoch.<br />
-        - The agent key can only trigger the rebirth and update Karma. It cannot touch user funds.<br />
-        - Every epoch transition is guarded by a lock so a congested chain can never double-launch.<br />
-        - Fixed supply, locked liquidity, no mint, no blacklist, no tax increases (Pons v2 guarantees).<br />
-        - The full source (contracts, backend, frontend) is public on GitHub.
+        - Sacrificed tokens are transferred straight to 0x…dEaD. The Altar never holds them; nobody can withdraw them.<br />
+        - Karma is computed inside the contract from the measured burn. The backend only mirrors events.<br />
+        - The keeper key can call seal(), stage metadata, rebirth() and set the airdrop root. It cannot move ETH or tokens.<br />
+        - rebirth() can only send ETH to three fixed executors: the founder splitter, the Reincarnator (fixed Pons factory) and the Buyback (fixed route).<br />
+        - Fee-share pools are per epoch; a later epoch can never spend an earlier pool.<br />
+        - Every setter is disabled by a one-way freeze() after the mainnet test epoch. Until then the owner (cold wallet, not the keeper) can adjust parameters; all changes emit events.<br />
+        - $THANATOS fees go to holders through Pons&apos; own contracts. Thanatos never touches them.<br />
+        - Pons v2 guarantees: fixed supply, locked liquidity, no mint, no blacklist, no tax increases.<br />
+        - Contracts are unaudited. Source is public on GitHub with a Hardhat test suite.
       </Box>
 
       <H n="08">THE AUTONOMOUS AGENT</H>
-      <P>A serverless backend watches the chain, scores each burn, and keeps the leaderboard. When an epoch ends it asks a language model
-        to name the new token from the ashes of the most-burned tokens (DEADFROG + RUGPULL become something new), sanitizes the output,
-        launches it on Pons, airdrops it, and announces it on X via @ThanatosAltar. No human is in the loop.</P>
+      <P>Three keys, three jobs. The <strong className="text-bone">verifier</strong> signs deadness vouchers after checking DexScreener/GeckoTerminal history. The <strong className="text-bone">keeper</strong> watches the chain, asks a language model to fuse the most-burned tickers into a new name (DEADFROG + RUGPULL → DEADPULL), stages it, calls rebirth(), and publishes the airdrop merkle root. The <strong className="text-bone">owner</strong> is a cold wallet used only for deployment and the final freeze. An indexer mirrors contract events into a cache the website reads; every headline number is read from the contract directly (marked ◆).</P>
 
       <H n="09">PARAMETERS</H>
       <Box>
         Chain: Robinhood Chain (id 4663) - Launchpad: Pons v2<br />
         $THANATOS: 1B fixed supply, ETH pair, 2% creator tax, Holder Fee Sharing on<br />
-        Epoch 1 clock: 6 hours - later epochs: 24 hours (tunable)<br />
-        Initial soul target: 1000 SW - grows 1.25x per epoch<br />
-        Clock bonus: +1 minute per soul weight burned<br />
-        Airdrop: top 50 by epoch Karma - seed buy 0.005 ETH per rebirth<br />
+        Epoch 1 clock: 6 hours · later epochs: 24 hours (frozen after setup)<br />
+        Initial soul target: 1000 karma · grows 1.25× per epoch<br />
+        Altar fee: 0.0005 ETH per burn · clock bonus: +1 min per verified karma, max +30 min per wallet per epoch<br />
+        Unverified: 38 karma per burn, 380 cap per wallet per epoch<br />
+        Split: 20% protocol · then 30% fee share / 40% seed / 30% $THANATOS buyback-burn<br />
+        Airdrop: top 50 by epoch karma, merkle claim<br />
         No presale - no team allocation - no staking lockups
       </Box>
 
       <H n="10">RISKS (READ THIS)</H>
-      <P>Rebirth tokens are memecoins created by an algorithm; they can go to zero. Fee income depends on trading volume that may never
-        materialize. Smart contracts are unaudited. Burned tokens cannot be recovered under any circumstances. Only sacrifice what you
-        already consider worthless.</P>
+      <P>Rebirth tokens are memecoins created by an algorithm; they can go to zero. Fee share depends on trading volume and altar activity that may never materialize; it can be zero. Smart contracts are unaudited. Burned tokens cannot be recovered under any circumstances. The altar fee is not refundable. Only sacrifice what you already consider worthless.</P>
 
       <div className="mt-12 border-t border-ash pt-6 text-center text-[10px] tracking-[0.2em] text-bone/30">
         THE ALTAR IS OPEN - <Link href="/" className="text-ember hover:text-flame">SACRIFICE</Link>

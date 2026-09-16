@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { History } from "lucide-react";
 import { useThanatosStore } from "@/store/useThanatosStore";
+import { useAltarState } from "@/hooks/useAltarState";
 
 export function Reincarnations({ full = false }: { full?: boolean }) {
   const rows = useThanatosStore((s) => s.reincarnations);
-  const epoch = useThanatosStore((s) => s.altar.epoch);
+  const { epoch, deployed } = useAltarState();
   const PONS = "https://www.ponsfamily.com/token/";
   const list = full ? rows : rows.slice(0, 3);
 
@@ -16,8 +17,8 @@ export function Reincarnations({ full = false }: { full?: boolean }) {
       </h3>
       <div className="space-y-2">
         <div className="flex justify-between border-l-2 border-ash pl-3 text-bone/40">
-          <span>Epoch #{epoch}</span>
-          <span className="animate-pulse">Pending...</span>
+          <span>{deployed ? `Epoch #${epoch}` : "Epoch #1"}</span>
+          <span className="animate-pulse">{deployed ? "In progress..." : "Awaiting deployment"}</span>
         </div>
         {list.map((r) => (
           <div key={r.epoch} className="flex justify-between border-l-2 border-purple-400 pl-3 text-bone/80">
@@ -35,7 +36,7 @@ export function Reincarnations({ full = false }: { full?: boolean }) {
       </div>
       {!full && (
         <Link href="/archive" className="mt-4 inline-block text-[10px] tracking-[0.2em] text-ember hover:text-flame">
-          FULL ARCHIVE â†’
+          FULL ARCHIVE →
         </Link>
       )}
     </div>

@@ -14,24 +14,24 @@ const STEPS = [
   {
     Icon: Crown,
     title: "EARN KARMA",
-    body: "Every burn adds soul weight to your permanent Karma. Karma decides your ETH share of rebirth-token fees and your airdrop size.",
+    body: "Every burn earns Karma, scored on-chain. Epoch karma decides your fee share and airdrop for that round; lifetime karma sets your tier.",
   },
   {
     Icon: Gift,
     title: "INHERIT THE REBIRTH",
-    body: "When the clock hits zero or the target is reached, a new token launches on Pons. Top 50 by epoch Karma receive the airdrop.",
+    body: "When the clock hits zero or the target is reached, a new token launches on Pons. Top 50 by epoch karma can claim the airdrop.",
   },
   {
     Icon: Coins,
-    title: "CLAIM ETH FOREVER",
-    body: "30% of rebirth-token fees flow to the dividend vault. Claim your share by Karma weight, in ETH, from every future epoch.",
+    title: "CLAIM FEE SHARE",
+    body: "30% of each epoch treasury is a fee-share pool. Claim your share by epoch karma, in ETH. Amounts depend on activity and may be zero.",
   },
 ];
 
 const SPLIT = [
-  ["30%", "DIVIDENDS", "ETH to burners, claimable by Karma share", "border-ember text-ember"],
-  ["40%", "REBIRTH TREASURY", "Seeds the next epoch token launch", "border-flame text-flame"],
-  ["30%", "PROTOCOL", "Keeps the Altar autonomous and the bots running", "border-purple-400 text-purple-400"],
+  ["30%", "FEE SHARE", "ETH to burners, claimable by epoch karma", "border-ember text-ember"],
+  ["40%", "SEED", "Launches and seeds the next epoch token", "border-flame text-flame"],
+  ["30%", "BUYBACK", "Buys $THANATOS and burns it to 0x…dEaD", "border-purple-400 text-purple-400"],
 ];
 
 export function HowItWorks() {
@@ -61,7 +61,8 @@ export function HowItWorks() {
         </div>
         <div className="panel border-l-2 border-flame p-4">
           <div className="mb-1 text-[10px] tracking-[0.25em] text-flame">REBIRTH TOKEN FEES</div>
-          <div className="text-2xl font-bold text-bone">2.7% <span className="text-sm font-normal text-bone/50">of volume to the FeeSplitter</span></div>
+          <div className="text-2xl font-bold text-bone">2.7% <span className="text-sm font-normal text-bone/50">of volume + altar fees → the Altar treasury</span></div>
+          <p className="mt-1 text-xs text-bone/50">20% protocol (two founder wallets, 50/50, on-chain splitter). The remaining 80% is split at each rebirth:</p>
           <div className="mt-2 flex h-1.5 w-full gap-px overflow-hidden">
             <div className="bg-ember" style={{ width: "30%" }} /><div className="bg-flame" style={{ width: "40%" }} /><div className="bg-purple-500" style={{ width: "30%" }} />
           </div>
@@ -80,7 +81,7 @@ export function HowItWorks() {
         ))}
       </div>
       <p className="mt-4 text-center text-[10px] tracking-[0.15em] text-bone/30">
-        NO PRESALE - NO TEAM ALLOCATION - LOCKED LIQUIDITY - KARMA IS PERMANENT - SOUL TARGET GROWS 1.25x EACH REBIRTH
+        NO PRESALE · NO TEAM ALLOCATION · LOCKED LIQUIDITY · 0.0005 ETH ALTAR FEE PER BURN · SOUL TARGET GROWS 1.25x EACH REBIRTH
       </p>
     </section>
   );
