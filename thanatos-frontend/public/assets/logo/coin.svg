@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<circle cx="256" cy="256" r="256" fill="#131116"/>
+<circle cx="256" cy="256" r="238" fill="none" stroke="#2b2630" stroke-width="4"/>
+<path fill="#ece5d8" d="M256 88 C164 88 100 154 100 242 C100 296 126 334 166 356 L166 398 Q166 430 198 430 L314 430 Q346 430 346 398 L346 356 C386 334 412 296 412 242 C412 154 348 88 256 88 Z"/>
+<g fill="#131116">
+  <ellipse cx="203" cy="262" rx="37" ry="30" transform="rotate(-8 203 262)"/>
+  <ellipse cx="309" cy="262" rx="37" ry="30" transform="rotate(8 309 262)"/>
+  <path d="M256 296 L236 336 Q256 348 276 336 Z"/>
+  <rect x="219" y="382" width="7" height="48" rx="3"/><rect x="245" y="382" width="7" height="48" rx="3"/><rect x="271" y="382" width="7" height="48" rx="3"/><rect x="297" y="382" width="7" height="48" rx="3"/>
+</g>
+<g transform="translate(0 -46)" opacity="0.94"><g transform="rotate(0 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(45 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(90 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(135 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(180 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(225 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(270 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g>
+<g transform="rotate(315 256 256)"><g stroke="#e53138" stroke-width="9" stroke-linecap="round" fill="none">
+  <line x1="256" y1="256" x2="256" y2="158"/>
+  <line x1="240" y1="212" x2="272" y2="212"/>
+  <line x1="245" y1="186" x2="267" y2="186"/>
+  <path d="M243 170 L256 158 L269 170"/>
+</g></g><circle cx="256" cy="256" r="9" fill="#e53138"/></g>
+</svg>
