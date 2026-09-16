@@ -626,3 +626,10 @@ body.wm-open{overflow:hidden}
 .tb-ca.done{border-color:rgba(94,227,154,.45)}.tb-ca.done .tb-copy{color:var(--phosphor)}
 .tokenbar .btn.sm{height:36px}
 @media (max-width:640px){.tokenbar{width:100%;padding:10px}.tb-ca{flex:1 1 100%;order:3;justify-content:space-between}.tb-trade{flex:1 1 auto;order:4}#tb-chart{order:5}}
+/* ── Charon card header: name · role · dev link ────────────────────── */
+.scribe-card .who{display:flex;align-items:center;gap:10px;right:24px}
+.scribe-card .who .who-sub{font:400 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--bone-3);white-space:nowrap}
+.scribe-card .who .who-link{font:400 11px var(--mono);letter-spacing:.04em;text-transform:none;color:var(--bone-3);white-space:nowrap}
+.scribe-card .who .who-link:hover{color:var(--flame)}
+.scribe-card .who .sp{flex:1}
+@media (max-width:640px){.scribe-card .who .who-sub{display:none}}

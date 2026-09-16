@@ -156,6 +156,7 @@
       <span class="meta">seeded ${r.seededEth.toFixed(4)} ETH · fee share ${r.feeShareEth.toFixed(4)} ETH</span><span class="links">${r.token ? `<a href="https://www.ponsfamily.com/launchpad/${esc(r.token)}" target="_blank" rel="noopener">Pons ↗</a>` : ""}</span></div>`).join("");
   }
 
+  { const d = $("#dev-link"); if (d && CFG.links.dev) { d.hidden = false; d.href = CFG.links.dev; d.textContent = "@" + CFG.links.dev.replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//, "").replace(/\/$/, ""); } }
   function renderTokenBar() {
     const bar = $("#tokenbar"); if (!bar) return;
     const has = A.isSet(CFG.token); bar.hidden = !has; if (!has) return;

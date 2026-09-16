@@ -32,6 +32,6 @@ window.THANATOS = {
   ],
   epoch: { minHours: 6, minTreasuryEth: "0.01", deadnessPct: 5 },
 
-  links: { x: "https://x.com/ThanatosAltar", telegram: "", pons: "https://www.ponsfamily.com/launchpad/0x54fa89cE31A10a1e5Ef57734C6DB9eEc203B434F", chart: "https://www.geckoterminal.com/robinhood/pools/0xA029Ee0a69ad3351a30aa071C18760825b96dd1C", github: "https://github.com/0xCharon155/thanatos" },
+  links: { x: "https://x.com/ThanatosAltar", dev: "https://x.com/0xCharon155", telegram: "", pons: "https://www.ponsfamily.com/launchpad/0x54fa89cE31A10a1e5Ef57734C6DB9eEc203B434F", chart: "https://www.geckoterminal.com/robinhood/pools/0xA029Ee0a69ad3351a30aa071C18760825b96dd1C", github: "https://github.com/0xCharon155/thanatos" },
   pollMs: 12000,
 };
