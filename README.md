@@ -81,8 +81,8 @@ Amounts depend on activity and may be zero.
                                | contract views (headline numbers, marked ◆) + event cache
                                v
 +------------------------------------------------------------------------------+
-|  Next.js frontend (static export, any host)                                  |
-|  Dormant state until ALTAR_ADDRESS is set . voucher fetch before sacrifice   |
+|  Static site (thanatos-frontend/public, any host)                            |
+|  Dormant until config.js has the Altar address . voucher fetch before burn   |
 +------------------------------------------------------------------------------+
 ```
 
@@ -116,14 +116,17 @@ Minimum epoch length 6 h; minimum treasury to seal 0.01 ETH (otherwise +6 h).
 
 ```
 thanatos/
-|-- thanatos-frontend/          Next.js . Tailwind . wagmi v2 . RainbowKit . Zustand
-|   |-- src/app/                layout, dashboard page, /whitepaper
-|   |-- src/components/         Header, Hero, MetricStrip, IncineratorForm, NecroPitCanvas,
-|   |                           TelemetryTerminal, HowItWorks, Leaderboard, FeeShareVault, AirdropClaim (on-chain),
-|   |                           Reincarnations, RebirthOverlay
-|   |-- src/hooks/              useAltarState (contract views), useSacrificeLogs (event cache), useFeeShareClaim
-|   |-- src/config/             wagmi chain, contract ABIs, DB client
-|   `-- src/store/              useThanatosStore (Zustand)
+|-- thanatos-frontend/          static site: no build step, no framework
+|   |-- public/index.html       the altar (Three.js hero, incinerator, feed, leaderboard, vault, archive links)
+|   |-- public/whitepaper.html  whitepaper v2.0
+|   |-- public/archive.html     rebirth archive
+|   |-- public/js/config.js     the only file to edit: addresses, voucher URL, Firebase project
+|   |-- public/js/abi.js        hand-encoded selectors for ThanatosAltarV2 / Reincarnator / ERC-20
+|   |-- public/js/data.js       Firestore REST (event cache) + JSON-RPC (contract views) + demo data
+|   |-- public/js/wallet.js     EIP-1193 / EIP-6963 wallet, chain switch, tx send
+|   |-- public/js/app.js        altar page logic and motion
+|   |-- public/js/altar3d.js    Three.js altar; public/js/scribe.js the Scribe character
+|   `-- firebase.json           hosting config (cleanUrls)
 |
 `-- thanatos-backend/
     |-- contracts/              ThanatosAltarV2.sol, Reincarnator.sol, Buyback.sol, FounderSplitter.sol
@@ -170,7 +173,7 @@ deployment uses Firebase, but every piece is swappable:
 | Chain | Robinhood Chain + Pons v2 | Any EVM chain with a launchpad exposing a `launchToken`-style call |
 
 ### Prerequisites
-Node 22+, a wallet with a little gas on the target chain, a WalletConnect Cloud project id.
+Node 22+ and a wallet with a little gas on the target chain.
 
 ### 1. Contracts
 
@@ -216,12 +219,15 @@ schedule, and replace `config/firebase.ts` with your own DB client.
 
 ### 3. Frontend
 
+No build step. Edit `thanatos-frontend/public/js/config.js` (Altar, Reincarnator, voucher URL,
+Firebase project for the event cache, $THANATOS once launched), then host the `public/` folder anywhere.
+While the Altar address is zero the site shows a dormant state and disables every write.
+`index.html?demo=1` renders example data for previews.
+
 ```bash
 cd thanatos-frontend
-cp .env.example .env.local      # chain, contract addresses, WC project id, DB config
-npm install
-npm run dev                     # http://localhost:3000
-npm run build                   # static export to ./out, host anywhere
+cp .firebaserc.example .firebaserc   # set your project id
+firebase deploy --only hosting
 ```
 
 ### Self-checks

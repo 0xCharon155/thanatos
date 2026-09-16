@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THANATOS — Necromancer Protocol</title>
+<meta name="description" content="An altar for the 13,000 tokens that die each day. Burn what is dead. Earn soul weight. Witness the rebirth — on Robinhood Chain.">
+<meta name="theme-color" content="#08070a">
+<meta property="og:title" content="THANATOS — Necromancer Protocol">
+<meta property="og:description" content="Death is not the end of a token.">
+<meta property="og:image" content="assets/social/og-1200x630.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/logo/logo-monogram-16.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/thanatos.css">
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><i></i></div>
+<div class="page">
+<header class="top">
+  <a class="brand" href="./" aria-label="THANATOS — home"><span id="brand-mark"></span><b>THANATOS</b></a>
+  <nav class="anchors" aria-label="Sections"><a href="#altar">Altar</a><a href="#economy">Economy</a><a href="#ritual">Ritual</a><a href="#proof">Proof</a><a href="whitepaper.html">Whitepaper</a></nav>
+  <span class="sp"></span>
+  <span class="pill dormant" id="state-pill"><span class="g" id="state-glyph"></span><span class="t">Loading</span></span>
+  <span class="pill net" id="net-pill"><span class="g" id="net-glyph"></span><span class="t">Robinhood Chain</span></span>
+  <button class="btn sm" id="btn-switch" hidden type="button">Switch to Robinhood Chain</button>
+  <button class="btn ember" id="btn-connect" type="button"><span id="wallet-ico"></span><span id="btn-connect-t">Connect wallet</span></button>
+</header>
+<div class="ribbon amber" id="ribbon" hidden role="status"><span id="ribbon-ico"></span><span id="ribbon-t"></span></div>
+
+<section class="hero" id="altar" aria-label="The altar">
+  <canvas id="altar-canvas" aria-hidden="true"></canvas>
+  <img class="still" id="altar-still" src="assets/altar/altar-01-front34.png" alt="" aria-hidden="true">
+  <div class="hero-in">
+    <p class="eyebrow">Necromancer Protocol · Robinhood Chain</p>
+    <h1 class="wm" id="hero-wm"><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">THANATOS</span></h1>
+    <p class="tag">Death is not the end of a token. Offer what is dead; it burns forever, its soul weighs on the bar, and when the bar fills the epoch is reborn.</p>
+    <div class="state"><span class="pill dormant" id="altar-state-pill"><span class="g" id="altar-state-glyph"></span><span class="t">Dormant</span></span><span class="ep">Epoch <b id="altar-epoch">—</b></span><span class="clock off" id="hero-clock">--:--:--</span></div>
+    <div class="cta"><a class="btn ember lg" href="#offer">Offer a dead token</a><a class="btn ghost lg" href="#ritual">How the ritual works</a></div>
+  </div>
+  <div class="hero-foot">
+    <div class="gaugewrap"><div class="k"><span class="label">Soul bar</span><span class="n"><span id="soul-k">0 / 1,000</span> <span class="src" id="soul-src"></span></span></div><div class="bar gauge"><i id="soul-bar"></i></div></div>
+    <div class="sacs"><span class="label">Sacrifices this epoch</span><span class="big"><span id="sacs-n">0</span> <span class="src" id="sacs-src"></span></span></div>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="metrics" aria-label="Altar metrics">
+    <div class="metric"><span class="label">Active epoch</span><div class="v epoch" id="m-epoch">—</div><div class="foot"><span class="sub" id="m-epoch-sub">—</span><span class="src" id="m-epoch-src"></span></div></div>
+    <div class="metric"><span class="label">Death clock</span><div class="v clock off" id="m-clock">--:--:--</div><div class="foot"><span class="sub" id="m-clock-sub">until the altar seals</span><span class="src" id="m-clock-src"></span></div></div>
+    <div class="metric"><span class="label">Soul weight</span><div class="v" id="m-soul">0<small>/ 1,000</small></div><div class="bar"><i id="m-soul-bar"></i></div><div class="foot"><span class="sub">karma this epoch</span><span class="src" id="m-soul-src"></span></div></div>
+    <div class="metric"><span class="label">Treasury</span><div class="v" id="m-tre">0.0000<small>ETH</small></div><div class="foot"><span class="sub" id="m-tre-sub">altar fees + rebirth-token fees</span><span class="src" id="m-tre-src"></span></div></div>
+  </section>
+
+  <section class="chapter reveal" id="offer" aria-label="Offer">
+    <div class="ch-head"><h2 class="t-sec">The Incinerator</h2><p class="lede">You offer. The Scribe writes. Nothing is erased.</p></div>
+    <div class="row2">
+    <div class="card" id="incinerator">
+      <header><span class="t-card"><span id="ico-inc"></span>Incinerator</span><span class="sp"></span><span class="status dim" id="inc-status">—</span></header>
+      <div class="field">
+        <div class="k"><label class="label" for="in-addr">Dead token address</label></div>
+        <div class="inwrap"><input id="in-addr" type="text" placeholder="0x…" autocomplete="off" spellcheck="false"><span class="tag dim" id="in-tag"></span></div>
+        <div class="fmsg" id="in-msg">Paste the token contract, not your wallet.</div>
+      </div>
+      <div class="field">
+        <div class="k"><label class="label" for="in-amt">Amount</label><span class="bal" id="in-bal"></span></div>
+        <div class="inwrap"><input id="in-amt" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="tag dim" id="in-sym"></span></div>
+        <div class="amt"><input id="in-range" type="range" min="0" max="100" value="0" aria-label="Percent of balance"><div class="qp"><button type="button" data-p="25">25</button><button type="button" data-p="50">50</button><button type="button" data-p="100">100</button></div></div>
+      </div>
+      <div class="steps" id="steps" aria-hidden="true"><span>I · Approve</span><span>II · Sacrifice</span><span>III · Reborn</span></div>
+      <div class="fees"><span>Altar fee</span><b id="fee-eth">0.0005 ETH</b><span>Soul weight earned</span><b id="soul-earn">—</b></div>
+      <button class="btn ember lg w" id="btn-sac" type="button" disabled>Sacrifice · Burn forever</button>
+      <p class="help" id="sac-why" aria-live="polite"></p>
+      <p class="help">Burning is irreversible. Dead tokens carry karma, not ETH. Verified-dead offerings weigh the most; unverified ones earn a small, capped amount.</p>
+    </div>
+
+    <div class="card scribe-card" aria-label="The Scribe">
+      <div class="who"><span class="t-card"><span id="ico-tele"></span><span>The Scribe</span></span></div>
+      <p class="cap"><b>Keeper of the Book of Ash</b>Every offering is written into the mirror. He nods for the verified dead, shakes his head at the living, and closes the book when the altar seals.</p>
+      <div class="scene"><div id="scribe"></div>
+        <div class="mirror"><span class="live off" id="tele-live"><span class="dot"></span><span id="tele-txt">no feed</span></span><div class="term" id="term" aria-live="polite" aria-label="Sacrifice feed"></div></div>
+      </div>
+      <div class="term-mobile" id="term-mobile"></div>
+    </div>
+    </div>
+  </section>
+
+  <section class="chapter reveal" id="economy" aria-label="Circular economy">
+    <div class="ch-head"><h2 class="t-sec">Circular Economy</h2><p class="lede">Karma ranks you. The treasury pays you. The altar rebirths.</p></div>
+    <div class="row3b" style="margin-top:0">
+    <div class="card">
+      <header><span class="t-card"><span id="ico-crown"></span>Top sacrificers</span><span class="sp"></span><span class="src idx" id="lb-src"></span></header>
+      <div class="lb" id="lb"></div>
+    </div>
+    <div class="card">
+      <header><span class="t-card"><span id="ico-vault"></span>Fee-share vault</span><span class="sp"></span><span class="src" id="claim-src"></span></header>
+      <div><span class="label">Claimable by you</span><div class="claim-n" id="claimable">0.0000<small>ETH</small></div></div>
+      <button class="btn outline lg w" id="btn-claim" type="button" disabled>Nothing to claim</button>
+      <p class="help" id="claim-why" aria-live="polite"></p>
+      <div id="airdrops"></div>
+      <hr class="sep">
+      <div><span class="label">Treasury split at rebirth</span><div class="split" id="split" style="margin-top:10px" aria-hidden="true"></div><div class="split-legend" id="split-legend" style="margin-top:8px"></div><p class="foot-note" id="reserve" style="margin-top:8px"></p></div>
+      <hr class="sep">
+      <div><span class="label">Where the ETH comes from</span><div class="sources" id="sources" style="margin-top:10px"></div></div>
+      <p class="foot-note">Fee share is not yield. Amounts depend on activity and may be zero.</p>
+    </div>
+    <div class="card">
+      <header><span class="t-card"><span id="ico-reb"></span>Reincarnations</span><span class="sp"></span><span class="src idx" id="rein-src"></span></header>
+      <div class="rein" id="rein"></div>
+      <a class="btn sm link" href="archive.html" style="align-self:flex-start;padding:0">Archive <span id="ico-ext"></span></a>
+    </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="ritual" aria-label="The ritual">
+    <header><span id="ico-sigil"></span><h2 class="t-sec">The Ritual</h2><p class="lede">Death is not the end of a token.</p></header>
+    <div class="rite-line" aria-hidden="true"><i></i></div>
+    <div class="rites">
+      <div class="rite"><div class="n">I</div><h4>Verify</h4><p>Point the altar at a dead token. The verifier checks it once had a market on Robinhood Chain and now trades under 5% of its peak, then signs a one-hour voucher.</p></div>
+      <div class="rite"><div class="n">II</div><h4>Sacrifice</h4><p>Burn it forever for 0.0005 ETH. Verified dead earns 38 karma ×1.5 plus an amount bonus and bends the clock; unverified tokens earn 5, capped at 25 per wallet per epoch.</p></div>
+      <div class="rite"><div class="n">III</div><h4>Seal</h4><p>When the death clock runs out the altar seals — never sooner than six hours in, and only with at least 0.01 ETH in the treasury. A thin treasury extends the epoch instead.</p></div>
+      <div class="rite"><div class="n">IV</div><h4>Rebirth</h4><p>20% to the protocol, then 30 / 40 / 30 of the rest: fee share to soul holders, a new token launched on Pons and airdropped to every burner, a $THANATOS buyback-burn.</p></div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="proof" aria-label="Proof">
+    <header><span id="ico-shield"></span><h2 class="t-sec">Proof</h2></header>
+    <div class="proof">
+      <div class="pf"><span class="label">Altar contract</span><div class="v" id="pf-altar">—</div><div class="sub"><span class="badge dim" id="pf-altar-badge">unset</span><span id="pf-src"></span></div></div>
+      <div class="pf"><span class="label">Treasury balance</span><div class="v" id="pf-tre">—</div><div class="sub"><span class="src" id="pf-tre-src"></span></div></div>
+      <div class="pf"><span class="label">$THANATOS token</span><div class="v" id="pf-token">—</div><div class="sub" id="pf-token-sub"></div></div>
+      <div class="pf"><span class="label">Latest block</span><div class="v" id="pf-block">—</div><div class="sub"><span class="src chain"><b>◆</b>on-chain</span></div></div>
+      <div class="pf"><span class="label">Indexer</span><div class="v" id="pf-idx">—</div><div class="sub"><span class="src idx"><b>▤</b>indexed</span></div></div>
+    </div>
+  </section>
+
+  <section class="climax reveal" aria-label="Offer">
+    <div class="mark" id="climax-mark"></div>
+    <h2>Burn what is dead. Witness what returns.</h2>
+    <p>Every dead token weighs something. The altar takes the dead, not the sick — and pays the faithful in fee share, not promises.</p>
+    <a class="btn ember lg" href="#offer">Offer a dead token</a>
+  </section>
+
+  <footer>
+    <div class="frow"><span class="brand" id="foot-brand"></span><span>Necromancer Protocol · Robinhood Chain</span><span class="sp"></span><nav id="foot-links" aria-label="Links"></nav></div>
+    <p class="how">The treasury holds ETH from two sources: a 0.0005 ETH altar fee on every offering, and 2.7% of the trading volume of every token the altar has reborn, collected from the Pons fee escrow. Dead tokens add no ETH; they add soul weight. At rebirth, 20% goes to the protocol and the rest is split 30 / 40 / 30 — fee share to soul holders, a seed buy of the new token airdropped to every burner, a $THANATOS buyback-burn. An epoch never seals before six hours or with less than 0.01 ETH in the treasury. $THANATOS itself pays its 2.7% to holders through Pons Holder Fee Sharing; the altar never touches it. If nobody offers and nobody trades, the treasury does not grow. Fee share is not yield and is not promised.</p>
+  </footer>
+</main>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/abi.js"></script>
+<script src="js/data.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/altar3d.js"></script>
+<script src="js/scribe.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
