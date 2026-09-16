@@ -582,8 +582,8 @@ footer{margin-top:0}
 .paper .grid .card{padding:16px}.paper .grid .card .label{margin-bottom:6px}.paper .grid .card p{font-size:14px;margin:0}
 
 /* ── wallet picker + account menu ─────────────────────────────────── */
-.wm{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,7,10,.72);backdrop-filter:blur(8px)}
-.wm[hidden]{display:none}
+.wpick{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,7,10,.72);backdrop-filter:blur(8px)}
+.wpick[hidden]{display:none}
 .wm-sheet{width:min(440px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:var(--ash);border:1px solid var(--line-h);border-radius:12px;padding:18px 18px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .wm-sheet header{display:flex;align-items:center;gap:10px}.wm-sheet header .sp{flex:1}
 .wm-x{width:36px;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--void);color:var(--bone-2);font:400 20px/1 var(--sans);cursor:pointer}
@@ -598,7 +598,7 @@ footer{margin-top:0}
 .wm-w small{margin-left:auto;font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--bone-3)}
 .wm-note{margin:0;font:400 13px/1.5 var(--sans);color:var(--bone-3)}.wm-note b{color:var(--bone-2);font-weight:500}
 body.wm-open{overflow:hidden}
-@media (max-width:640px){.wm{align-items:flex-end;padding:0}.wm-sheet{width:100%;max-height:88dvh;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}}
+@media (max-width:640px){.wpick{align-items:flex-end;padding:0}.wm-sheet{width:100%;max-height:88dvh;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}}
 .acct{position:fixed;top:72px;right:40px;z-index:40;width:300px;max-width:calc(100vw - 32px);background:var(--ash);border:1px solid var(--line-h);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .acct[hidden]{display:none}
 .acct-h{display:flex;align-items:center;gap:8px;font:500 13px var(--sans);color:var(--bone)}.acct-h img{width:20px;height:20px;border-radius:5px}.acct-h .src{margin-left:auto}

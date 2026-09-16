@@ -98,7 +98,7 @@ window.Wallet = (() => {
   let modal = null, listEl = null;
   function openModal() {
     if (!modal) {
-      modal = document.createElement("div"); modal.className = "wm"; modal.innerHTML =
+      modal = document.createElement("div"); modal.className = "wpick"; modal.innerHTML =
         `<div class="wm-sheet" role="dialog" aria-modal="true" aria-label="Connect a wallet"><header><span class="wm-mark">${ic("logo-monogram", "i")}</span><div><span class="t-card">Connect a wallet</span><p class="wm-sub">Choose how to reach the altar.</p></div><span class="sp"></span><button class="wm-x" type="button" aria-label="Close">×</button></header><div class="wm-body"></div></div>`;
       document.body.appendChild(modal); listEl = modal.querySelector(".wm-body");
       modal.addEventListener("click", e => { if (e.target === modal || e.target.closest(".wm-x")) closeModal(); });
