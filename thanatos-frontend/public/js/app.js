@@ -126,7 +126,7 @@
       return `<div class="r ${tier}${mine ? " me" : ""}"><span class="n">${String(i + 1).padStart(2, "0")}</span><span class="g">${ic("tier-" + tier)}</span><span class="w" title="${esc(r.wallet)}">${mine ? "you · " : ""}${esc(short(r.wallet))}</span><span class="k">${n0(r.karma)}${r.epochKarma > 0 ? `<small>+${n0(r.epochKarma)} this epoch</small>` : ""}</span></div>`; };
     const top = rows.slice(0, 8).map(row);
     if (me >= 8) top.push(row(rows[me], me)); else if (ME && me < 0 && CH?.soulOf) top.push(`<div class="r mortal me"><span class="n">—</span><span class="g">${ic("tier-mortal")}</span><span class="w">you · ${esc(short(ME))}</span><span class="k">${n0(CH.soulOf)}</span></div>`);
-    el.innerHTML = top.join("") + `<div class="foot"><span>Arch-Necromancer top 3 · Soul Reaper top 10 · Acolyte</span><a href="archive.html">Archive ↗</a></div>`;
+    el.innerHTML = top.join("") + `<div class="foot"><span>Arch-Necromancer top 3 · Soul Reaper top 10 · Acolyte</span><a href="archive">Archive ↗</a></div>`;
   }
 
   function renderVault() {
@@ -153,8 +153,24 @@
     if (!rows.length) { el.innerHTML = cur || `<div class="empty">${ic("state-rebirth")}<h4>Nothing reborn yet</h4><p>The first reincarnation launches when Epoch ${roman(st.epoch)} ends — when the death clock runs out.</p></div>`; return; }
     el.innerHTML = cur + rows.slice(0, 4).map(r => `<div class="e"><span class="ep">Epoch ${roman(r.epoch)}</span><span class="d">${r.ts ? new Date(r.ts).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""}</span>
       <span class="sym">$${esc(r.symbol)}</span><span class="addr">${r.token ? `<a href="${ex("token", r.token)}" target="_blank" rel="noopener">${esc(short(r.token))} ↗</a>` : "—"}</span>
-      <span class="meta">seeded ${r.seededEth.toFixed(4)} ETH · fee share ${r.feeShareEth.toFixed(4)} ETH</span><span class="links">${r.token ? `<a href="https://www.ponsfamily.com/token/${esc(r.token)}" target="_blank" rel="noopener">Pons ↗</a>` : ""}</span></div>`).join("");
+      <span class="meta">seeded ${r.seededEth.toFixed(4)} ETH · fee share ${r.feeShareEth.toFixed(4)} ETH</span><span class="links">${r.token ? `<a href="https://www.ponsfamily.com/launchpad/${esc(r.token)}" target="_blank" rel="noopener">Pons ↗</a>` : ""}</span></div>`).join("");
   }
+
+  function renderTokenBar() {
+    const bar = $("#tokenbar"); if (!bar) return;
+    const has = A.isSet(CFG.token); bar.hidden = !has; if (!has) return;
+    if (!$("#tb-mark").innerHTML) $("#tb-mark").innerHTML = ic("logo-monogram", "i");
+    if (!$("#tb-copy").innerHTML) $("#tb-copy").innerHTML = `${ic("copy", "i s")} copy`;
+    $("#tb-addr").textContent = innerWidth < 900 ? short(CFG.token) : CFG.token;
+    const t = $("#tb-trade"); t.href = CFG.links.pons || ex("token", CFG.token);
+    const ch = $("#tb-chart"); ch.hidden = !CFG.links.chart; if (CFG.links.chart) ch.href = CFG.links.chart;
+  }
+  $("#tb-ca")?.addEventListener("click", async () => {
+    const b = $("#tb-ca"); try { await navigator.clipboard.writeText(CFG.token); } catch { return toast("err", `<b>Copy failed.</b> ${esc(CFG.token)}`); }
+    b.classList.add("done"); $("#tb-copy").innerHTML = `${ic("shield-check", "i s")} copied`; toast("ok", `<b>Contract address copied.</b> <span class="mono">${esc(CFG.token)}</span>`);
+    setTimeout(() => { b.classList.remove("done"); $("#tb-copy").innerHTML = `${ic("copy", "i s")} copy`; }, 1600);
+  });
+  addEventListener("resize", () => { if (A.isSet(CFG.token)) $("#tb-addr").textContent = innerWidth < 900 ? short(CFG.token) : CFG.token; });
 
   function renderProof() {
     const st = S();
@@ -163,13 +179,13 @@
     $("#pf-src").innerHTML = CFG.verifiedSource ? `<a href="${esc(CFG.verifiedSource)}" target="_blank" rel="noopener">Verified source ↗</a>` : `<span>source not published</span>`;
     $("#pf-tre").textContent = st.live ? `${eth(CH.treasuryWei, 4)} ETH` : "—"; $("#pf-tre-src").innerHTML = st.live ? SRC.chain : "";
     $("#pf-token").innerHTML = CFG.token ? `<a href="${ex("token", CFG.token)}" target="_blank" rel="noopener" style="color:var(--bone)">${esc(short(CFG.token))} ↗</a>` : '<span class="dim">not launched</span>';
-    $("#pf-token-sub").innerHTML = CFG.token ? `<span>2.7% of volume → holders (Pons Holder Fee Sharing)</span>${CFG.links.dexscreener ? ` · <a href="${esc(CFG.links.dexscreener)}" target="_blank" rel="noopener">DexScreener ↗</a>` : ""}` : "";
+    $("#pf-token-sub").innerHTML = CFG.token ? `<span>2.7% of volume → holders (Pons Holder Fee Sharing)</span>${CFG.links.chart ? ` · <a href="${esc(CFG.links.chart)}" target="_blank" rel="noopener">Chart ↗</a>` : ""}` : "";
     $("#pf-tre-src").innerHTML = st.live ? SRC.chain + (CH?.uncollectedWei > 0n ? ` · <span>${eth(CH.uncollectedWei, 4)} ETH uncollected in the <a href="${ex("address", CFG.feeEscrow)}" target="_blank" rel="noopener">Pons escrow</a></span>` : "") : "";
     $("#pf-src").innerHTML += A.isSet(CFG.reincarnator) ? ` · <a href="${ex("address", CFG.reincarnator)}" target="_blank" rel="noopener">Reincarnator ↗</a>` : "";
     $("#pf-block").textContent = CH?.block ? n0(CH.block) : "rpc unreachable"; $("#pf-block").title = CH?.block ? `via ${D.rpcUrl()}` : "";
     const u = IDX?.state?.updatedAt; $("#pf-idx").textContent = !u ? "idle" : (Date.now() - u < 60e3 ? `${Math.max(1, Math.round((Date.now() - u) / 1000))} s ago` : Date.now() - u < 4 * 60e3 ? `${Math.round((Date.now() - u) / 60e3)} min ago` : `stale · ${Math.round((Date.now() - u) / 60e3)} min`);
     $("#pf-idx").style.color = !u ? "var(--bone-3)" : Date.now() - u < 4 * 60e3 ? "var(--phosphor)" : "var(--amber)";
-    const L = CFG.links, items = [["Archive", "archive.html"], ["Whitepaper", "whitepaper.html"], ["Source", L.github], ["Audit", CFG.audit], ["X", L.x], ["Telegram", L.telegram]].filter(([, u]) => u);
+    const L = CFG.links, items = [["Archive", "archive"], ["Whitepaper", "whitepaper"], ["Trade", L.pons], ["Source", L.github], ["Audit", CFG.audit], ["X", L.x], ["Telegram", L.telegram]].filter(([, u]) => u);
     $("#foot-links").innerHTML = items.map(([n, u]) => `<a href="${esc(u)}"${/^https?:/.test(u) ? ' target="_blank" rel="noopener"' : ""}>${n}</a>`).join("") + (CFG.audit ? "" : '<span class="unaudited">Unaudited</span>');
   }
 
@@ -320,7 +336,7 @@
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) { const io3 = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io3.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" }); $$(".reveal").forEach(x => io3.observe(x)); }
   })();
 
-  function renderAll() { renderHeader(); renderMetrics(); renderTelemetry(); renderLeaderboard(); renderVault(); renderRein(); renderProof(); gate(); }
+  function renderAll() { renderHeader(); renderMetrics(); renderTelemetry(); renderLeaderboard(); renderVault(); renderRein(); renderProof(); renderTokenBar(); gate(); }
   async function refresh() {
     if (PLAYING) return;
     const [i, c] = await Promise.all([D.indexed().catch(() => IDX), D.onchain(ME).catch(() => CH)]);

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://thanatosaltar.xyz/sitemap.xml

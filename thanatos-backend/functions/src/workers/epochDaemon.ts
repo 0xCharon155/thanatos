@@ -84,7 +84,7 @@ export async function evaluateEpoch(): Promise<Status> {
   const token = await readClient.readContract({ address: REINCARNATOR_ADDRESS, abi: reincarnatorAbi, functionName: "tokenOf", args: [epoch] });
   const meta = (await db.doc(`reincarnations/${e}`).get()).data();
   if (token !== ZERO) {
-    await tweet(`${meta?.tweet ?? `Epoch #${e} is reborn.`}\n\n$${meta?.token_symbol} https://www.ponsfamily.com/token/${token}\n${EXPLORER_URL}/tx/${h}`);
+    await tweet(`${meta?.tweet ?? `Epoch #${e} is reborn.`}\n\n$${meta?.token_symbol} https://www.ponsfamily.com/launchpad/${token}\n${EXPLORER_URL}/tx/${h}`);
   }
   return "REBORN";
 }

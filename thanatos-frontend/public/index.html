@@ -4,13 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>THANATOS — Necromancer Protocol</title>
-<meta name="description" content="An altar for the 13,000 tokens that die each day. Burn what is dead. Earn soul weight. Witness the rebirth — on Robinhood Chain.">
+<meta name="description" content="The Necromancer Protocol on Robinhood Chain. Burn dead tokens at the Altar, earn karma on-chain, share the fees in ETH, and claim every token reborn from the ashes.">
 <meta name="theme-color" content="#08070a">
+<link rel="canonical" href="https://thanatosaltar.xyz/">
+<meta property="og:url" content="https://thanatosaltar.xyz/">
 <meta property="og:title" content="THANATOS — Necromancer Protocol">
-<meta property="og:description" content="Death is not the end of a token.">
-<meta property="og:image" content="assets/social/og-1200x630.png">
+<meta property="og:description" content="Burn dead tokens at the Altar, earn karma on-chain, share the fees in ETH. Every epoch, a token is reborn. Robinhood Chain.">
+<meta property="og:image" content="https://thanatosaltar.xyz/assets/social/og-1200x630.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@ThanatosAltar">
+<meta name="twitter:title" content="THANATOS — Necromancer Protocol">
+<meta name="twitter:description" content="Burn dead tokens at the Altar, earn karma on-chain, share the fees in ETH. Every epoch, a token is reborn. Robinhood Chain.">
+<meta name="twitter:image" content="https://thanatosaltar.xyz/assets/social/og-1200x630.png">
 <link rel="icon" href="assets/logo/favicon-64.png" type="image/png" sizes="64x64"><link rel="icon" href="assets/logo/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -22,7 +30,7 @@
 <div class="page">
 <header class="top">
   <a class="brand" href="./" aria-label="THANATOS — home"><span id="brand-mark"></span><b>THANATOS</b></a>
-  <nav class="anchors" aria-label="Sections"><a href="#altar">Altar</a><a href="#economy">Economy</a><a href="#ritual">Ritual</a><a href="#proof">Proof</a><a href="whitepaper.html">Whitepaper</a></nav>
+  <nav class="anchors" aria-label="Sections"><a href="#altar">Altar</a><a href="#economy">Economy</a><a href="#ritual">Ritual</a><a href="#proof">Proof</a><a href="whitepaper">Whitepaper</a></nav>
   <span class="sp"></span>
   <span class="pill dormant" id="state-pill"><span class="g" id="state-glyph"></span><span class="t">Loading</span></span>
   <span class="pill net" id="net-pill"><span class="g" id="net-glyph"></span><span class="t">Robinhood Chain</span></span>
@@ -33,13 +41,20 @@
 
 <section class="hero" id="altar" aria-label="The altar">
   <canvas id="altar-canvas" aria-hidden="true"></canvas>
-  <img class="still" id="altar-still" src="assets/altar/altar-01-front34.png" alt="" aria-hidden="true">
+  <img class="still" id="altar-still" src="assets/altar/altar-01-front34.webp" width="1600" height="1600" alt="" aria-hidden="true">
   <div class="hero-in">
     <p class="eyebrow">Necromancer Protocol · Robinhood Chain</p>
     <h1 class="wm" id="hero-wm"><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">THANATOS</span></h1>
-    <p class="tag">Death is not the end of a token. Offer what is dead; it burns forever, its soul weighs on the bar, and when the bar fills the epoch is reborn.</p>
+    <p class="tag">Death is not the end of a token. Offer what is dead; it burns forever, its soul weighs on the bar, and when the death clock runs out the epoch is reborn.</p>
     <div class="state"><span class="pill dormant" id="altar-state-pill"><span class="g" id="altar-state-glyph"></span><span class="t">Dormant</span></span><span class="ep">Epoch <b id="altar-epoch">—</b></span><span class="clock off" id="hero-clock">--:--:--</span></div>
     <div class="cta"><a class="btn ember lg" href="#offer">Offer a dead token</a><a class="btn ghost lg" href="#ritual">How the ritual works</a></div>
+    <div class="tokenbar" id="tokenbar" hidden>
+      <span class="tb-mark" id="tb-mark"></span>
+      <span class="tb-sym">$THANATOS</span>
+      <button class="tb-ca" id="tb-ca" type="button" title="Copy contract address"><span class="label">CA</span><code id="tb-addr"></code><span class="tb-copy" id="tb-copy"></span></button>
+      <a class="btn ember sm tb-trade" id="tb-trade" href="#" target="_blank" rel="noopener">Trade on Pons ↗</a>
+      <a class="btn sm" id="tb-chart" href="#" target="_blank" rel="noopener" hidden>Chart ↗</a>
+    </div>
   </div>
   <div class="hero-foot">
     <div class="gaugewrap"><div class="k"><span class="label">Soul bar</span><span class="n"><span id="soul-k">0 / 1,000</span> <span class="src" id="soul-src"></span></span></div><div class="bar gauge"><i id="soul-bar"></i></div></div>
@@ -110,7 +125,7 @@
     <div class="card">
       <header><span class="t-card"><span id="ico-reb"></span>Reincarnations</span><span class="sp"></span><span class="src idx" id="rein-src"></span></header>
       <div class="rein" id="rein"></div>
-      <a class="btn sm link" href="archive.html" style="align-self:flex-start;padding:0">Archive <span id="ico-ext"></span></a>
+      <a class="btn sm link" href="archive" style="align-self:flex-start;padding:0">Archive <span id="ico-ext"></span></a>
     </div>
     </div>
   </section>

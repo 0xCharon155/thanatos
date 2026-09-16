@@ -277,7 +277,7 @@ npx tsx src/services/twitterService.ts  # posts a test tweet (dry-runs without t
 | Rebirth fee recipient | `ThanatosAltarV2` (treasury; split at rebirth) |
 | Snipe protection | 99% buy tax decaying to 0 over the first seconds; the Altar is exempted on rebirth launches |
 
-Every rebirth token has its own Pons page at `ponsfamily.com/token/<address>`; the site's
+Every rebirth token has its own Pons page at `ponsfamily.com/launchpad/<address>`; the site's
 Reincarnations panel links there and the rebirth overlay shows a "Trade on Pons" button.
 
 ## Status / known gaps
