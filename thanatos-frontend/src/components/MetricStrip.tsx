@@ -29,18 +29,19 @@ export function MetricStrip() {
     { k: "EPOCH", v: dash ? "—" : `#${a.epoch}`, Icon: Hash },
     { k: "DEATH CLOCK", v: dash || now === null ? "--:--:--" : a.phase !== 0 ? "SEALED" : fmt(remaining), Icon: Clock, cls: panic ? "clock-panic" : urgent ? "text-amber-400 animate-pulse" : "" },
     { k: "SOUL WEIGHT", v: dash ? "—" : `${a.soulWeight.toFixed(1)} / ${a.soulTarget.toFixed(0)}`, Icon: Flame, bar: true },
-    { k: "TREASURY", v: dash ? "—" : `${a.treasuryEth.toFixed(4)} ETH`, Icon: Landmark },
+    { k: "TREASURY", v: dash ? "—" : `${a.treasuryEth.toFixed(4)} ETH`, Icon: Landmark, sub: a.uncollectedEth > 0 ? `+${a.uncollectedEth.toFixed(4)} ETH uncollected on Pons` : undefined },
   ];
 
   return (
     <section className="grid grid-cols-2 gap-px border-b border-ash bg-ash md:grid-cols-4">
-      {cells.map(({ k, v, Icon, cls, bar }) => (
+      {cells.map(({ k, v, Icon, cls, bar, sub }) => (
         <div key={k} className="group relative bg-void p-4 transition-colors hover:bg-ember/5">
           <div className="flex items-center gap-1.5 text-[10px] tracking-[0.2em] text-bone/40">
             <Icon className="h-3 w-3" /> {k}
             {!dash && <OnChain />}
           </div>
           <div className={`mt-1 text-2xl font-semibold tabular-nums text-bone ${cls ?? ""}`}>{v}</div>
+          {sub && <div className="text-[10px] text-bone/40">{sub}</div>}
           {bar && (
             <div className="mt-2 h-1 w-full bg-ash">
               <div className="h-full bg-gradient-to-r from-ember to-flame shadow-[0_0_8px_#f97316] transition-all duration-700" style={{ width: `${pct}%` }} />

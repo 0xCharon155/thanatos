@@ -9,8 +9,7 @@ import { useAltarState } from "@/hooks/useAltarState";
 
 const STATUS = [
   { label: "EPOCH ACTIVE", dot: "bg-phosphor shadow-[0_0_8px_#4ade80]", text: "text-phosphor" },
-  { label: "SEALED · EVALUATING", dot: "bg-amber-400 shadow-[0_0_8px_#fbbf24]", text: "text-amber-400" },
-  { label: "REBIRTH IN PROGRESS", dot: "bg-purple-400 shadow-[0_0_8px_#c084fc]", text: "text-purple-400" },
+  { label: "SEALED · REBIRTH PENDING", dot: "bg-amber-400 shadow-[0_0_8px_#fbbf24]", text: "text-amber-400" },
 ];
 const DORMANT = { label: "ALTAR NOT DEPLOYED", dot: "bg-bone/30", text: "text-bone/40" };
 

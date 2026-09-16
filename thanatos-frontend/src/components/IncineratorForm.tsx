@@ -111,7 +111,7 @@ export function IncineratorForm() {
               ) : voucher?.status === "alive" ? (
                 <><ShieldCheck className="h-3 w-3 text-amber-400" /><span className="text-amber-400">Verified but still trading · karma ×1.0</span></>
               ) : (
-                <><ShieldQuestion className="h-3 w-3 text-bone/40" /><span className="text-bone/40">No market history · base karma only, capped per epoch</span></>
+                <><ShieldQuestion className="h-3 w-3 text-bone/40" /><span className="text-bone/40">No market history · small base karma, capped per epoch</span></>
               )}
             </div>
           </div>
