@@ -9,12 +9,12 @@ window.THANATOS = {
            rpcs: ["https://rpc.mainnet.chain.robinhood.com", "https://robinhood-rpc.publicnode.com", "https://robinhood.drpc.org", "https://rpc.ordofi.network"] },
 
   // ── fill after deploy (see thanatos-backend/scripts/deployContracts.ts output) ──
-  altar: "0x0000000000000000000000000000000000000000",          // ThanatosAltarV2
-  reincarnator: "0x0000000000000000000000000000000000000000",   // Reincarnator (airdrop claims)
+  altar: "0xA33c08FF354C5Fd91Ab2C30CCC2DbeFd8722d2a2",          // ThanatosAltarV2
+  reincarnator: "0x961a81B937cD7a5aB649a4A985578c8fA4177fE3",   // Reincarnator (airdrop claims)
   feeEscrow: "0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e",      // Pons v2 fee escrow: creator revenue waits here until collect()
   token: "",                 // $THANATOS (Pons)
-  voucherUrl: "",            // Cloud Function `voucher` — signs deadness vouchers
-  verifiedSource: "",        // Blockscout "Verified" link
+  voucherUrl: "https://us-central1-thanatos-e440a.cloudfunctions.net/voucher",            // Cloud Function `voucher` — signs deadness vouchers
+  verifiedSource: "https://robinhoodchain.blockscout.com/address/0xA33c08FF354C5Fd91Ab2C30CCC2DbeFd8722d2a2?tab=contract",        // Blockscout "Verified" link
   audit: "",                 // audit link (empty = shows "unaudited")
 
   // Firestore event cache — public read through REST; written only by the indexer.

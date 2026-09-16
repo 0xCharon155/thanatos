@@ -120,11 +120,12 @@ async function buybackMinOut(amount: bigint): Promise<bigint> {
 
 async function warn(endsAt: number, e: number) {
   const s = (await altarRef().get()).data() ?? {};
+  const warnedMap: Record<string, number[]> = s.warned && !Array.isArray(s.warned) ? s.warned : {};
   const remainingH = (endsAt - Date.now() / 1000) / 3600;
   for (const h of WARN_HOURS) {
-    if (remainingH <= h && remainingH > 0 && !(s.warned?.[e] ?? []).includes(h)) {
+    if (remainingH <= h && remainingH > 0 && !(warnedMap[e] ?? []).includes(h)) {
       await tweet(`${h}h remain before the Altar seals Epoch #${e}. ${SITE_URL}`);
-      await altarRef().set({ warned: { [e]: [...(s.warned?.[e] ?? []), h] } }, { merge: true });
+      await altarRef().set({ warned: { [e]: [...(warnedMap[e] ?? []), h] } }, { merge: true });
     }
   }
 }
