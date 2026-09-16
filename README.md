@@ -11,21 +11,31 @@
 
 ## What it does
 
-THANATOS is a fully autonomous, non-custodial protocol that turns worthless ERC-20 "dust" into a
-perpetual reward loop:
+THANATOS is a fully autonomous, non-custodial protocol on Robinhood Chain built on the Pons v2 launchpad.
+It has **two kinds of token** and **four ways to earn**.
 
-1. **Burn** â€” users send dead/rugged tokens to `ThanatosAltar`. Tokens are locked forever.
-2. **Earn Karma** â€” each burn is scored as *soul weight* (log-scaled by amount, boosted for tokens
-   with zero DEX activity). Karma is permanent across epochs.
-3. **Rebirth** â€” when the epoch's *death clock* expires or the soul-weight target is reached, the
-   backend asks an LLM to synthesize lore + ticker from the top burned tokens and launches a new
-   token on the Pons bonding-curve factory using the treasury.
-4. **Airdrop** â€” top 50 burners by epoch Karma receive the new token pro-rata.
-5. **Dividends** â€” 30% of every trading fee on every reborn token flows to `ThanatosFeeSplitter`
-   and is claimable in ETH by Karma share.
+### $THANATOS - the brand token
+Launched once on Pons with **Holder Fee Sharing** enabled. Every trade pays 2.7% in fees
+(1% Pons curve fee, of which 70% is the creator side, plus a 2% creator tax). 100% of that creator
+side is distributed pro-rata to all $THANATOS holders by Pons' own contracts and claimed from the
+holder's Pons profile. No team wallet, no protocol cut.
 
-Fee split on all reborn tokens: **30%** dividends â†’ burners Â· **40%** treasury â†’ seeds next rebirth Â· **30%** protocol.
+### Rebirth tokens - one per epoch
+1. **Burn** - users send dead/rugged ERC-20s to `ThanatosAltar`. Tokens are locked forever.
+2. **Earn Karma** - each burn is scored as *soul weight* (log-scaled by amount, x1.5 for tokens with
+   zero DEX activity). Karma is permanent across epochs.
+3. **Rebirth** - when the epoch's *death clock* expires or the soul-weight target is reached, the
+   backend asks an LLM to synthesize a name/ticker/lore from the top burned tokens and launches a new
+   token on Pons v2 from the treasury.
+4. **Airdrop** - top 50 burners by epoch Karma receive the new token pro-rata.
+5. **Dividends** - the new token's creator fees (2.7% of volume) flow to `ThanatosFeeSplitter`:
+   **30%** ETH dividends to burners by Karma - **40%** treasury that seeds the next rebirth - **30%** protocol.
 
+| Daily rebirth-token volume | To FeeSplitter (2.7%) | Burners 30% | Treasury 40% | Protocol 30% |
+|---|---|---|---|---|
+| $10k | $270 | $81 | $108 | $81 |
+| $100k | $2,700 | $810 | $1,080 | $810 |
+| $1M | $27,000 | $8,100 | $10,800 | $8,100 |
 ---
 
 ## Architecture
@@ -205,14 +215,26 @@ npx tsx src/services/twitterService.ts  # posts a test tweet (or dry-runs withou
 
 ---
 
+## Pons v2 integration
+
+| Item | Value |
+|---|---|
+| Factory | `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e` (`launchToken`, `previewLaunchEconomics`, `TokenLaunched`) |
+| Launch config | `0` - 1B supply, 1% curve fee, 4.2 ETH graduation into a locked Uniswap v4 pool |
+| Pair token | native ETH (`0x0`) |
+| Creator tax | 200 bps (2%) on all Thanatos tokens; protocol cap is 1000 bps |
+| $THANATOS fee recipient | Pons Holder Fee Sharing (holders claim from Pons profile) |
+| Rebirth fee recipient | `ThanatosFeeSplitter` (30/40/30) |
+| Snipe protection | 99% buy tax decaying to 0 over 3-5 s; the Altar is exempted on rebirth launches |
+
+Every rebirth token has its own Pons page at `ponsfamily.com/token/<address>`; the site's
+Reincarnations panel links there and the rebirth overlay shows a "Trade on Pons" button.
+
 ## Status / known gaps
 
-- `ponsFactoryAbi` in `functions/src/config/constants.ts` is a placeholder until the Pons
-  `launchAndBuy` signature is verified against `0x3711â€¦1A42`.
-- Reborn token address is inferred from receipt logs; swap to a proper event decode once the ABI is known.
-- Airdrop uses sequential `transfer` calls (â‰¤ 50 tx). Move to a disperse contract if gas matters.
+- Airdrop uses sequential `transfer` calls (<= 50 tx). Move to a disperse contract if gas matters.
 - Twitter posting requires an X API plan with write credits.
-
+- Contracts are unaudited.
 ## License
 
 MIT

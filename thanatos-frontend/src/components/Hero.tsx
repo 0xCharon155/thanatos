@@ -1,6 +1,8 @@
 ﻿"use client";
-import { Flame, Skull, Sparkles } from "lucide-react";
+import { ExternalLink, Flame, Skull, Sparkles, Wallet } from "lucide-react";
 import { useThanatosStore } from "@/store/useThanatosStore";
+
+const THANATOS_TOKEN = process.env.NEXT_PUBLIC_THANATOS_TOKEN;
 
 export function Hero() {
   const altar = useThanatosStore((s) => s.altar);
@@ -9,18 +11,31 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15),transparent_60%)]" />
       <div className="relative mx-auto max-w-3xl">
         <div className="mb-3 inline-flex items-center gap-2 border border-ember/40 bg-ember/10 px-3 py-1 text-[10px] tracking-[0.3em] text-ember">
-          <Sparkles className="h-3 w-3" /> ROBINHOOD CHAIN Â· EPOCH #{altar.epoch}
+          <Sparkles className="h-3 w-3" /> ROBINHOOD CHAIN - EPOCH #{altar.epoch}
         </div>
         <h1 className="text-4xl font-bold tracking-[0.2em] text-bone md:text-6xl">
           <span className="text-ember drop-shadow-[0_0_20px_#dc2626]">$THANATOS</span>
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-bone/60">
-          Feed your dead tokens to the Altar. Every burn adds soul weight and bends the death clock. When the clock strikes zero, the
-          ashes are reborn as a new token â€” and the top sacrificers inherit it.
+          Hold $THANATOS and earn 2.7% of every trade, paid to holders by Pons. Burn your dead tokens at the Altar to earn permanent
+          Karma, get airdropped every token reborn from the ashes, and claim ETH from their fees forever.
         </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {THANATOS_TOKEN ? (
+            <a href={`https://www.ponsfamily.com/token/${THANATOS_TOKEN}`} target="_blank" rel="noreferrer" className="btn-flame inline-flex w-auto items-center gap-2 px-6">
+              BUY $THANATOS ON PONS <ExternalLink className="h-3 w-3" />
+            </a>
+          ) : (
+            <span className="btn w-auto cursor-default border-ash px-6 text-bone/40">$THANATOS LAUNCHING SOON ON PONS</span>
+          )}
+          <a href="#altar" className="btn-ember inline-flex w-auto items-center gap-2 px-6">
+            <Flame className="h-3 w-3" /> SACRIFICE A TOKEN
+          </a>
+        </div>
         <div className="mt-6 flex flex-wrap justify-center gap-6 text-[10px] tracking-[0.2em] text-bone/40">
           <span className="flex items-center gap-2"><Skull className="h-3 w-3 text-ember" /> {altar.totalSacrifices.toLocaleString()} SOULS CLAIMED</span>
-          <span className="flex items-center gap-2"><Flame className="h-3 w-3 text-flame" /> 30% OF ALL FEES PAID TO BURNERS IN ETH</span>
+          <span className="flex items-center gap-2"><Wallet className="h-3 w-3 text-flame" /> HOLDER FEE SHARING ON</span>
+          <span className="flex items-center gap-2"><Flame className="h-3 w-3 text-flame" /> 30% OF REBIRTH FEES TO BURNERS IN ETH</span>
         </div>
       </div>
     </section>

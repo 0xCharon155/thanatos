@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { HowItWorks } from "@/components/HowItWorks";
 import { RebirthOverlay } from "@/components/RebirthOverlay";
 import { Hero } from "@/components/Hero";
@@ -19,7 +19,7 @@ export default function Page() {
       <Header />
       <Hero />
       <MetricStrip />
-      <section className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[1fr_1.5fr_1fr] lg:min-h-[480px]">
+      <section id="altar" className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[1fr_1.5fr_1fr] lg:min-h-[480px]">
         <IncineratorForm />
         <NecroPitCanvas />
         <TelemetryTerminal />
