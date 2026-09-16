@@ -4,7 +4,9 @@
 window.THANATOS = {
   mode: "live",                       // ?demo=1 in the URL → example data (shown with a ribbon)
   chain: { id: 4663, hex: "0x1237", name: "Robinhood Chain", currency: "ETH",
-           rpc: "https://rpc.mainnet.chain.robinhood.com", explorer: "https://robinhoodchain.blockscout.com" },
+           rpc: "https://rpc.mainnet.chain.robinhood.com", explorer: "https://robinhoodchain.blockscout.com",
+           // tried in order; the site moves to the next one when an endpoint is blocked or down
+           rpcs: ["https://rpc.mainnet.chain.robinhood.com", "https://robinhood-rpc.publicnode.com", "https://robinhood.drpc.org", "https://rpc.ordofi.network"] },
 
   // ── fill after deploy (see thanatos-backend/scripts/deployContracts.ts output) ──
   altar: "0x0000000000000000000000000000000000000000",          // ThanatosAltarV2

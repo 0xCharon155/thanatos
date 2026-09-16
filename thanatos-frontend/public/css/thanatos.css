@@ -580,3 +580,35 @@ footer{margin-top:0}
 .paper .box{font:400 13px/1.7 var(--mono);color:var(--bone-2);background:var(--ink-2,rgba(255,255,255,.03));border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin:8px 0 14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .paper .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:8px 0 14px}
 .paper .grid .card{padding:16px}.paper .grid .card .label{margin-bottom:6px}.paper .grid .card p{font-size:14px;margin:0}
+
+/* ── wallet picker + account menu ─────────────────────────────────── */
+.wm{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,7,10,.72);backdrop-filter:blur(8px)}
+.wm[hidden]{display:none}
+.wm-sheet{width:min(440px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:var(--ash);border:1px solid var(--line-h);border-radius:12px;padding:18px 18px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.wm-sheet header{display:flex;align-items:center;gap:10px}.wm-sheet header .sp{flex:1}
+.wm-x{width:36px;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--void);color:var(--bone-2);font:400 20px/1 var(--sans);cursor:pointer}
+.wm-x:hover{border-color:var(--line-h);color:var(--bone)}
+.wm-body{display:flex;flex-direction:column;gap:10px}
+.wm-body .label{margin-top:6px}
+.wm-list{display:flex;flex-direction:column;gap:8px}
+.wm-w{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--void);color:var(--bone);font:500 15px var(--sans);text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.wm-w:hover{border-color:var(--line-h);background:var(--ash-2);color:var(--bone)}
+.wm-w img,.wm-w .wm-i{width:28px;height:28px;border-radius:7px;flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--ash-2);color:var(--bone-2)}
+.wm-w .wm-i svg{width:16px;height:16px}
+.wm-w small{margin-left:auto;font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--bone-3)}
+.wm-note{margin:0;font:400 13px/1.5 var(--sans);color:var(--bone-3)}.wm-note b{color:var(--bone-2);font-weight:500}
+body.wm-open{overflow:hidden}
+@media (max-width:640px){.wm{align-items:flex-end;padding:0}.wm-sheet{width:100%;max-height:88dvh;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}}
+.acct{position:fixed;top:72px;right:40px;z-index:40;width:300px;max-width:calc(100vw - 32px);background:var(--ash);border:1px solid var(--line-h);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.acct[hidden]{display:none}
+.acct-h{display:flex;align-items:center;gap:8px;font:500 13px var(--sans);color:var(--bone)}.acct-h img{width:20px;height:20px;border-radius:5px}.acct-h .src{margin-left:auto}
+.acct-a{font:400 12px var(--mono);color:var(--bone-2);word-break:break-all;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--void)}
+.acct .btn.w{width:100%;height:40px}.acct .btn.out{color:var(--ember);border-color:rgba(255,74,43,.35)}
+@media (max-width:900px){.acct{top:64px;right:16px}}
+.wm-mark{width:40px;height:40px;border-radius:10px;background:var(--void);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wm-mark svg{width:28px;height:28px}
+.wm-sub{margin:4px 0 0;font:400 13px var(--sans);color:var(--bone-3)}
+.wm-w img{object-fit:contain;background:transparent}
+.wm-w:hover img{filter:drop-shadow(0 0 6px rgba(255,74,43,.35))}
+.wm-w.wm-static{cursor:default}.wm-w.wm-static:hover{border-color:var(--line);background:var(--void)}
+.wm-w small b{color:var(--bone-2);font-weight:500;text-transform:none;letter-spacing:0}

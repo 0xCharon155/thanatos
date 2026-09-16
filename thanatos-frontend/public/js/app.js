@@ -51,10 +51,11 @@
     const p = $("#state-pill"); p.className = "pill " + ph; p.querySelector(".t").textContent = PHASE_LABEL[ph]; $("#state-glyph").innerHTML = ic("state-" + ph);
     const np = $("#net-pill"); np.className = "pill net " + (ME && !WOK ? "warn" : ""); np.querySelector(".t").textContent = ME && !WOK ? "Wrong network" : C.name;
     $("#btn-switch").hidden = !(ME && !WOK);
-    const b = $("#btn-connect"); $("#btn-connect-t").textContent = ME ? short(ME) : "Connect wallet"; b.classList.toggle("ember", !ME); b.title = ME ? "Disconnect" : "";
+    const b = $("#btn-connect"); $("#btn-connect-t").textContent = ME ? short(ME) : "Connect wallet"; b.classList.toggle("ember", !ME); b.title = ME ? "Account" : "";
     const r = $("#ribbon"); let txt = "", cls = "amber";
     if (D.DEMO) { txt = "Preview with example data. Nothing below is live."; cls = "violet"; }
     else if (!altarSet) txt = "The altar is not consecrated yet — the contract has not been deployed.";
+    else if (CH?.rpcDown) txt = `Cannot reach a ${C.name} RPC from your network right now. Showing the indexed cache; on-chain reads will resume automatically.`;
     else if (!st.live) txt = `No contract found at ${short(CFG.altar)} on ${C.name}. Check config.js.`;
     else if (st.phase === "evaluating") txt = "The altar is sealed. Souls are being counted. No offerings are accepted.";
     else if (IDX?.state?.status === "STAGING" || IDX?.state?.status === "REBORN") { txt = `Epoch ${roman(st.epoch)} is being reborn. The next epoch opens after the launch.`; cls = "violet"; }
@@ -101,7 +102,7 @@
     // Scribe bereaksi hanya pada event yang BARU muncul sejak render terakhir
     if (window.Scribe) { const ids = new Set(ev.map(e => e.id || e.tx || e.ts)); if (SEEN) { const fresh = ev.filter(e => !SEEN.has(e.id || e.tx || e.ts)).slice(0, 3).reverse(); fresh.forEach((e, i) => setTimeout(() => window.Scribe.react(e.kind, e.verified), i * 1600)); } SEEN = ids; }
     if (!IDX) { live.className = "live off"; $("#tele-txt").textContent = "no feed"; }
-    else if (!st.live) { live.className = "live off"; $("#tele-txt").textContent = "offline · no altar contract"; }
+    else if (!st.live) { live.className = "live off"; $("#tele-txt").textContent = CH?.rpcDown ? "offline · rpc unreachable" : "offline · no altar contract"; }
     else if (st.phase === "evaluating") { live.className = "live amber"; $("#tele-txt").textContent = "evaluating"; }
     else { live.className = "live"; $("#tele-txt").textContent = `live · ${n0(IDX.state.block || CH?.block || 0)}`; }
     const el = $("#term");
@@ -165,7 +166,7 @@
     $("#pf-token-sub").innerHTML = CFG.token ? `<span>2.7% of volume → holders (Pons Holder Fee Sharing)</span>${CFG.links.dexscreener ? ` · <a href="${esc(CFG.links.dexscreener)}" target="_blank" rel="noopener">DexScreener ↗</a>` : ""}` : "";
     $("#pf-tre-src").innerHTML = st.live ? SRC.chain + (CH?.uncollectedWei > 0n ? ` · <span>${eth(CH.uncollectedWei, 4)} ETH uncollected in the <a href="${ex("address", CFG.feeEscrow)}" target="_blank" rel="noopener">Pons escrow</a></span>` : "") : "";
     $("#pf-src").innerHTML += A.isSet(CFG.reincarnator) ? ` · <a href="${ex("address", CFG.reincarnator)}" target="_blank" rel="noopener">Reincarnator ↗</a>` : "";
-    $("#pf-block").textContent = CH?.block ? n0(CH.block) : "rpc unreachable";
+    $("#pf-block").textContent = CH?.block ? n0(CH.block) : "rpc unreachable"; $("#pf-block").title = CH?.block ? `via ${D.rpcUrl()}` : "";
     const u = IDX?.state?.updatedAt; $("#pf-idx").textContent = !u ? "idle" : (Date.now() - u < 60e3 ? `${Math.max(1, Math.round((Date.now() - u) / 1000))} s ago` : Date.now() - u < 4 * 60e3 ? `${Math.round((Date.now() - u) / 60e3)} min ago` : `stale · ${Math.round((Date.now() - u) / 60e3)} min`);
     $("#pf-idx").style.color = !u ? "var(--bone-3)" : Date.now() - u < 4 * 60e3 ? "var(--phosphor)" : "var(--amber)";
     const L = CFG.links, items = [["Archive", "archive.html"], ["Whitepaper", "whitepaper.html"], ["Source", L.github], ["Audit", CFG.audit], ["X", L.x], ["Telegram", L.telegram]].filter(([, u]) => u);
@@ -197,7 +198,8 @@
   function gate() {
     const st = S(), w = amountWei(); let why = "", label = "Sacrifice · Burn forever";
     if (D.DEMO && !ME) why = "Preview — connect a wallet on the live site to offer.";
-    if (!st.live && !D.DEMO) { why = "The altar is not consecrated. No offerings until the contract is deployed."; label = "Altar not consecrated"; }
+    if (CH?.rpcDown && !D.DEMO) { why = `Cannot reach a ${C.name} RPC from your network. Try again in a moment.`; label = "RPC unreachable"; }
+    else if (!st.live && !D.DEMO) { why = "The altar is not consecrated. No offerings until the contract is deployed."; label = "Altar not consecrated"; }
     else if (st.phase === "evaluating") { why = "The altar is sealed while souls are counted."; label = "Sealed while souls are counted"; }
     else if (!ME) { why = why || "Connect a wallet to offer."; label = "Connect wallet to offer"; }
     else if (!WOK) { why = `You are on the wrong network. The altar is on ${C.name}.`; label = `Switch to ${C.name}`; }
@@ -253,7 +255,9 @@
       D.forgetAirdrop(ME, ep); toast("ok", `<b>Airdrop claimed.</b> Epoch ${roman(ep)} tokens sent to ${short(ME)}.`, `<a href="${ex("tx", h)}" target="_blank" rel="noopener">${short(h)} ↗</a>`); await refresh(); }
     catch (err) { toast("err", `<b>Failed.</b> ${esc((err.message || "Claim failed").split("\n")[0].slice(0, 160))}`, `<button type="button" onclick="this.closest('.toast').remove()">Retry</button>`); renderVault(); }
   });
-  $("#btn-connect").addEventListener("click", async () => { if (ME) return; try { await Wl.connect(); } catch (e) { toast("err", `<b>No wallet.</b> ${esc(e.message)}`); } });
+  Wl.onError = e => toast("err", `<b>Failed.</b> ${esc((e?.message || "Wallet error").split("\n")[0].slice(0, 140))}`);
+  $("#btn-connect").addEventListener("click", async () => { if (ME) return Wl.menu(); try { await Wl.connect(); } catch (e) { if (e?.code !== 4001) Wl.onError(e); } });
+  if (D.DEMO && new URLSearchParams(location.search).get("wallet") === "1") setTimeout(() => Wl.connect(), 700);
   $("#btn-switch").addEventListener("click", async () => { try { await Wl.ensureChain(); } catch (e) { toast("err", `<b>Failed.</b> ${esc(e.message)}`); } });
   Wl.on(async st => { ME = st.account; WOK = st.ok; renderHeader(); if (ME) { try { CH = await D.onchain(ME); } catch {} } renderAll(); if (I.addr.value) loadToken(); });
 

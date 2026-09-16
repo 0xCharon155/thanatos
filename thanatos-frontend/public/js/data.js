@@ -21,11 +21,27 @@ window.Data = (() => {
     const r = await fetch(`${FS}:runAggregationQuery?key=${CFG.firebase.apiKey}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     if (!r.ok) return 0; const j = await r.json(); return Number(j?.[0]?.result?.aggregateFields?.n?.integerValue ?? 0);
   }
-  let id = 1;
+  let id = 1, rpcIdx = 0;
+  const RPCS = C.rpcs && C.rpcs.length ? C.rpcs : [C.rpc];
+  // Rotates to the next endpoint on transport failures (blocked region, outage, rate limit); a
+  // JSON-RPC error for a valid call (e.g. a revert) is returned as-is.
   async function rpc(method, params = []) {
-    const r = await fetch(C.rpc, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: id++, method, params }) });
-    const j = await r.json(); if (j.error) throw new Error(j.error.message || "rpc error"); return j.result;
+    let lastErr;
+    for (let i = 0; i < RPCS.length; i++) {
+      const url = RPCS[(rpcIdx + i) % RPCS.length];
+      try {
+        const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: id++, method, params }) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        if (j.error && (j.error.code === -32601 || j.error.code === -32603 || /not (found|supported|available)/i.test(j.error.message || ""))) throw new Error(j.error.message);
+        rpcIdx = (rpcIdx + i) % RPCS.length;
+        if (j.error) throw Object.assign(new Error(j.error.message || "rpc error"), { rpcError: true });
+        return j.result;
+      } catch (e) { if (e.rpcError) throw e; lastErr = e; }
+    }
+    throw Object.assign(lastErr || new Error("rpc unreachable"), { rpcDown: true });
   }
+  const rpcUrl = () => RPCS[rpcIdx];
   const call = (to, data) => rpc("eth_call", [{ to, data }, "latest"]);
   const hasCode = async a => A.isSet(a) && (await rpc("eth_getCode", [a, "latest"])) !== "0x";
   const ms = t => (t > 1e11 ? t : t * 1000);
@@ -83,10 +99,10 @@ window.Data = (() => {
     if (DEMO) { const now = Date.now(); return { altarLive: true, tokenLive: true, block: 18204113, treasuryWei: A.wei("0.4183"), buybackReserveWei: A.wei("0.0912"), uncollectedWei: A.wei("0.0134"), claimable: A.wei("0.0412"), totalDistributed: A.wei("1.2904"),
       epoch: 7, endsAt: now + (14 * 3600 + 17 * 60 + 9) * 1000, soul: 2418, soulTarget: 3815, phase: "burning", altarFeeWei: A.wei("0.0005"), soulOf: 118, karma: { verified: 38, unverified: 5, unverifiedCap: 25 },
       airdrops: account ? [{ epoch: 6, amount: 41_200_000n * 10n ** 18n }] : [], demo: true }; }
-    const out = { altarLive: false, tokenLive: false, block: 0, treasuryWei: 0n, buybackReserveWei: 0n, uncollectedWei: 0n, claimable: 0n, totalDistributed: 0n, epoch: null, endsAt: 0, soul: null, soulTarget: null, phase: null,
+    const out = { altarLive: false, tokenLive: false, rpcDown: false, block: 0, treasuryWei: 0n, buybackReserveWei: 0n, uncollectedWei: 0n, claimable: 0n, totalDistributed: 0n, epoch: null, endsAt: 0, soul: null, soulTarget: null, phase: null,
       altarFeeWei: A.wei(CFG.altarFeeEth), soulOf: 0, karma: { ...CFG.karma }, airdrops: [] };
-    try { out.block = Number(await rpc("eth_blockNumber")); } catch {}
-    try { out.altarLive = await hasCode(CFG.altar); } catch {}
+    try { out.block = Number(await rpc("eth_blockNumber")); } catch (e) { if (e.rpcDown) { out.rpcDown = true; return out; } }
+    try { out.altarLive = await hasCode(CFG.altar); } catch (e) { if (e.rpcDown) { out.rpcDown = true; return out; } }
     try { out.tokenLive = await hasCode(CFG.token); } catch {}
     if (!out.altarLive) return out;
     const rd = async (sel, ...args) => A.decUint(await call(CFG.altar, A.enc(sel, ...args)).catch(() => "0x"));
@@ -139,5 +155,5 @@ window.Data = (() => {
     return { state: { epoch: 7, phase: "burning", status: "BURNING", soul: 2418, soulTarget: 3815, endsAt: now + (14 * 3600 + 17 * 60 + 9) * 1000, treasuryEth: 0.4183, buybackReserveEth: 0.0912, distributedEth: 1.2904,
       totalSacrifices: 41, updatedAt: now - 14000 }, events, leaderboard, reincarnations, epochs: {}, fetchedAt: now, demo: true, ok: true };
   }
-  return { DEMO, rpc, call, indexed, onchain, token, hasCode, forgetAirdrop };
+  return { DEMO, rpc, rpcUrl, call, indexed, onchain, token, hasCode, forgetAirdrop };
 })();
