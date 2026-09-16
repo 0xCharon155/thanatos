@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { History } from "lucide-react";
 import { useThanatosStore } from "@/store/useThanatosStore";
