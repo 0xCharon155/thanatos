@@ -3,9 +3,9 @@ import { type Address } from "viem";
 export type TokenHealth = { hadLiquidity: boolean; peakLiquidityUsd: number; nowLiquidityUsd: number; vol24: number; pairs: number };
 
 /**
- * Deadness check for the voucher (C-4). "Dead" = it once had a real market and is now < 5% of
+ * Deadness check for the voucher. "Dead" = it once had a real market and is now < 5% of
  * peak liquidity (or zero volume). A never-traded token is NOT dead -> no bonus (bots minting junk).
- * ponytail: DexScreener + GeckoTerminal only; add Pons graduationStatus() once curve indexing exists
+ * Sources: DexScreener and GeckoTerminal. Pons curve state can be added once curve indexing exists.
  */
 export async function tokenHealth(token: Address): Promise<TokenHealth> {
   const out: TokenHealth = { hadLiquidity: false, peakLiquidityUsd: 0, nowLiquidityUsd: 0, vol24: 0, pairs: 0 };

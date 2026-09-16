@@ -6,8 +6,8 @@ import { classify, tokenHealth } from "./dexMetrics";
 export type VoucherOut = { token: Address; multBps: number; expiry: number; sig: Hex; status: "dead" | "alive" | "unknown" };
 
 /**
- * EIP-712 deadness voucher (C-4). Signed by the VERIFIER key (separate from the agent key).
- * unknown tokens get no voucher: the contract then applies baseKarma with a per-wallet cap.
+ * EIP-712 deadness voucher. Signed by the VERIFIER key (separate from the agent key).
+ * Unknown tokens get no voucher: the contract then applies the small, capped unverified karma.
  */
 export async function issueVoucher(tokenRaw: string): Promise<VoucherOut | { status: "unknown"; reason: string }> {
   if (!isAddress(tokenRaw)) return { status: "unknown", reason: "bad address" };

@@ -23,7 +23,7 @@ export const voucher = onRequest({ region, secrets: ["VERIFIER_PRIVATE_KEY"], co
   res.json(out);
 });
 
-/** Ops only: IAM-protected (invoker = ops SA). No shared secret in query strings (M-13). */
+/** Ops only: IAM-protected (invoker = ops SA). No shared secret in query strings. */
 export const indexNow = onRequest({ region, secrets, invoker: "private" }, async (_req, res) => {
   res.json({ indexed: await indexOnce() });
 });

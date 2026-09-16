@@ -6,10 +6,9 @@ import { tweet } from "../services/twitterService";
 import { tier } from "../utils/math";
 
 const cursorRef = () => db.doc("altar_state/indexer_cursor");
-const K = 10n ** 18n;
 const karmaNum = (k: bigint) => Number(k) / 1e18;
 
-/** Mirrors Offering / Sealed / Reborn / Claimed events into Firestore. Never computes karma (C-4). */
+/** Mirrors Offering / Sealed / Extended / Reborn / Claimed events into Firestore. Never computes karma. */
 export async function indexOnce(): Promise<number> {
   if (!isDeployed()) return 0;
   const latest = await logClient.getBlockNumber();
@@ -22,7 +21,7 @@ export async function indexOnce(): Promise<number> {
   try {
     logs = await logClient.getContractEvents({ address: ALTAR_ADDRESS, abi: altarAbi, fromBlock: from, toBlock: to });
   } catch (e) {
-    console.error(`[indexer] getLogs ${from}-${to} FAILED (H-10: configure INDEXER_RPC_URL)`, (e as Error).message.split("\n")[0]);
+    console.error(`[indexer] getLogs ${from}-${to} FAILED (configure INDEXER_RPC_URL)`, (e as Error).message.split("\n")[0]);
     throw e;
   }
 
@@ -81,6 +80,8 @@ export async function indexOnce(): Promise<number> {
         { epoch: Number(log.args.epoch), sealed_at: ts, soul_weight: karmaNum(log.args.soulWeight!), total_karma: karmaNum(log.args.totalKarma!), seal_tx: log.transactionHash },
         { merge: true },
       );
+    } else if (log.eventName === "Extended") {
+      await db.doc(`epochs/${Number(log.args.epoch)}`).set({ epoch: Number(log.args.epoch), extended_at: ts, ends_at: Number(log.args.endsAt) }, { merge: true });
     } else if (log.eventName === "Reborn") {
       const a = log.args;
       await db.doc(`epochs/${Number(a.epoch)}`).set(
@@ -110,13 +111,14 @@ export async function indexOnce(): Promise<number> {
 export async function refreshAltarState() {
   if (!isDeployed()) return;
   const c = { address: ALTAR_ADDRESS, abi: altarAbi } as const;
-  const [epoch, endsAt, sw, target, phase, treasury, distributed, altarFee] = await Promise.all([
+  const [epoch, endsAt, sw, target, phase, treasury, buybackReserve, distributed, altarFee] = await Promise.all([
     readClient.readContract({ ...c, functionName: "epoch" }),
     readClient.readContract({ ...c, functionName: "epochEndsAt" }),
     readClient.readContract({ ...c, functionName: "soulWeight" }),
     readClient.readContract({ ...c, functionName: "soulTarget" }),
     readClient.readContract({ ...c, functionName: "phase" }),
     readClient.readContract({ ...c, functionName: "treasury" }),
+    readClient.readContract({ ...c, functionName: "buybackReserve" }),
     readClient.readContract({ ...c, functionName: "totalDistributed" }),
     readClient.readContract({ ...c, functionName: "altarFee" }),
   ]);
@@ -130,6 +132,7 @@ export async function refreshAltarState() {
       soul_weight_target: karmaNum(target),
       phase: Number(phase),
       treasury_eth: formatEther(treasury),
+      buyback_reserve_eth: formatEther(buybackReserve),
       total_distributed_eth: formatEther(distributed),
       altar_fee_eth: formatEther(altarFee),
       last_updated: Date.now(),
@@ -141,5 +144,3 @@ export async function refreshAltarState() {
   top.docs.forEach((d, i) => batch.update(d.ref, { tier: tier(i + 1) }));
   await batch.commit();
 }
-
-export { K };
