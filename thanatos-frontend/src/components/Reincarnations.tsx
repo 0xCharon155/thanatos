@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { History } from "lucide-react";
 import { useThanatosStore } from "@/store/useThanatosStore";
@@ -6,7 +6,7 @@ import { useThanatosStore } from "@/store/useThanatosStore";
 export function Reincarnations({ full = false }: { full?: boolean }) {
   const rows = useThanatosStore((s) => s.reincarnations);
   const epoch = useThanatosStore((s) => s.altar.epoch);
-  const explorer = process.env.NEXT_PUBLIC_EXPLORER_URL;
+  const PONS = "https://www.ponsfamily.com/token/";
   const list = full ? rows : rows.slice(0, 3);
 
   return (
@@ -22,9 +22,9 @@ export function Reincarnations({ full = false }: { full?: boolean }) {
         {list.map((r) => (
           <div key={r.epoch} className="flex justify-between border-l-2 border-purple-400 pl-3 text-bone/80">
             <span>Epoch #{r.epoch}</span>
-            {r.token && explorer ? (
-              <a href={`${explorer}/token/${r.token}`} target="_blank" rel="noreferrer" className="font-semibold hover:text-flame">
-                ${r.symbol}
+            {r.token ? (
+              <a href={`${PONS}${r.token}`} target="_blank" rel="noreferrer" className="font-semibold hover:text-flame">
+                ${r.symbol} <span className="text-[9px] text-bone/40">PONS ↗</span>
               </a>
             ) : (
               <span className="font-semibold">${r.symbol}</span>
@@ -35,7 +35,7 @@ export function Reincarnations({ full = false }: { full?: boolean }) {
       </div>
       {!full && (
         <Link href="/archive" className="mt-4 inline-block text-[10px] tracking-[0.2em] text-ember hover:text-flame">
-          FULL ARCHIVE →
+          FULL ARCHIVE â†’
         </Link>
       )}
     </div>

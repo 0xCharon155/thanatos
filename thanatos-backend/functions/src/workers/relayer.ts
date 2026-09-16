@@ -1,4 +1,4 @@
-import { createPublicClient, createWalletClient, decodeEventLog, encodeFunctionData, erc20Abi, http, keccak256, parseEther, parseGwei, toHex, type Address } from "viem";
+﻿import { createPublicClient, createWalletClient, decodeEventLog, encodeFunctionData, erc20Abi, http, keccak256, parseEther, parseGwei, toHex, type Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {
   ALTAR_ADDRESS,
@@ -45,7 +45,7 @@ export async function runReincarnation(epoch: number) {
       {
         name: meta.name,
         symbol: meta.symbol,
-        logo: `${SITE_URL}/logo.svg`,
+        logo: `${SITE_URL}/logo.png`,
         description: meta.description.slice(0, 2048),
         socials: { twitter: "https://x.com/ThanatosAltar", telegram: "", discord: "", website: SITE_URL, farcaster: "" },
         creatorFeeRecipient: FEE_SPLITTER_ADDRESS,

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Clock, Flame, Hash, Landmark } from "lucide-react";
 import { useAltarState } from "@/hooks/useAltarState";
@@ -18,11 +18,13 @@ export function MetricStrip() {
     return () => clearInterval(id);
   }, []);
   const pct = Math.min(100, (altar.soulWeightCurrent / altar.soulWeightTarget) * 100);
-  const urgent = now !== null && altar.deathClockEnd - now < 3600_000;
+  const remaining = now === null ? Infinity : altar.deathClockEnd - now;
+  const urgent = remaining < 3600_000;
+  const panic = remaining < 60_000;
 
   const cells = [
     { k: "ACTIVE EPOCH", v: `#${altar.epoch}`, Icon: Hash },
-    { k: "DEATH CLOCK", v: now === null ? "--:--:--" : fmt(altar.deathClockEnd - now), Icon: Clock, cls: urgent ? "text-amber-400 animate-pulse" : "" },
+    { k: "DEATH CLOCK", v: now === null ? "--:--:--" : fmt(altar.deathClockEnd - now), Icon: Clock, cls: panic ? "clock-panic" : urgent ? "text-amber-400 animate-pulse" : "" },
     { k: "SOUL WEIGHT", v: `${altar.soulWeightCurrent.toFixed(1)} / ${altar.soulWeightTarget.toFixed(0)}`, Icon: Flame, bar: true },
     { k: "REBIRTH TREASURY", v: `${altar.treasuryEth.toFixed(3)} ETH`, Icon: Landmark },
   ];

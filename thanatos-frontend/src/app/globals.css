@@ -56,3 +56,51 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #dc2626;
 }
+
+@keyframes rebirthRing {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.rebirth-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200vmax;
+  height: 200vmax;
+  border-radius: 9999px;
+  border: 3px solid #f97316;
+  box-shadow: 0 0 60px #dc2626, inset 0 0 60px #dc2626;
+  animation: rebirthRing 1.6s ease-out forwards;
+}
+@keyframes rebirthAsh {
+  0% { transform: translateY(100vh) scale(1); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-20vh) scale(0.2); opacity: 0; }
+}
+.rebirth-ash {
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: #f97316;
+  box-shadow: 0 0 8px #f97316;
+  animation: rebirthAsh 2s ease-out infinite;
+}
+@keyframes rebirthCard {
+  0% { transform: scale(0.6); opacity: 0; filter: blur(8px); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+.rebirth-card { animation: rebirthCard 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; border-color: #f97316; box-shadow: 0 0 40px #dc262688; }
+
+@keyframes logFlash {
+  0% { background: rgba(249, 115, 22, 0.35); transform: translateX(-6px); }
+  100% { background: transparent; transform: translateX(0); }
+}
+.log-new { animation: logFlash 1.2s ease-out; }
+
+@keyframes clockPanic {
+  0%, 100% { color: #e7e0d6; text-shadow: none; }
+  50% { color: #dc2626; text-shadow: 0 0 12px #dc2626; }
+}
+.clock-panic { animation: clockPanic 0.8s infinite; }

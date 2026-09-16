@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { HowItWorks } from "@/components/HowItWorks";
+import { RebirthOverlay } from "@/components/RebirthOverlay";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { MetricStrip } from "@/components/MetricStrip";
@@ -14,6 +15,7 @@ export default function Page() {
   return (
     <main className="min-h-screen">
       <div className="fixed inset-0 -z-10 opacity-[0.035] [background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence baseFrequency=%220.9%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/></svg>')]" />
+      <RebirthOverlay />
       <Header />
       <Hero />
       <MetricStrip />
