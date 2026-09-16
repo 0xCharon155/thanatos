@@ -1,24 +1,25 @@
-﻿"use client";
+"use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, Code2 } from "lucide-react";
 import { useAccount, useSwitchChain } from "wagmi";
 import { robinhoodChain } from "@/config/wagmi";
-import { useThanatosStore, type AltarStatus } from "@/store/useThanatosStore";
+import { useAltarState } from "@/hooks/useAltarState";
 
-const STATUS: Record<AltarStatus, { label: string; dot: string; text: string }> = {
-  ACTIVE_BURNING: { label: "EPOCH ACTIVE", dot: "bg-phosphor shadow-[0_0_8px_#4ade80]", text: "text-phosphor" },
-  EPOCH_EVALUATING: { label: "EVALUATING", dot: "bg-amber-400 shadow-[0_0_8px_#fbbf24]", text: "text-amber-400" },
-  REBIRTH_MINTING: { label: "REBIRTH MINTING", dot: "bg-purple-400 shadow-[0_0_8px_#c084fc]", text: "text-purple-400" },
-};
+const STATUS = [
+  { label: "EPOCH ACTIVE", dot: "bg-phosphor shadow-[0_0_8px_#4ade80]", text: "text-phosphor" },
+  { label: "SEALED · EVALUATING", dot: "bg-amber-400 shadow-[0_0_8px_#fbbf24]", text: "text-amber-400" },
+  { label: "REBIRTH IN PROGRESS", dot: "bg-purple-400 shadow-[0_0_8px_#c084fc]", text: "text-purple-400" },
+];
+const DORMANT = { label: "ALTAR NOT DEPLOYED", dot: "bg-bone/30", text: "text-bone/40" };
 
 export function Header() {
-  const status = useThanatosStore((s) => s.altar.status);
+  const a = useAltarState();
   const { isConnected, chainId } = useAccount();
   const { switchChain } = useSwitchChain();
   const wrongChain = isConnected && chainId !== robinhoodChain.id;
-  const st = STATUS[status];
+  const st = a.deployed ? STATUS[a.phase] : DORMANT;
 
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between border-b border-ash bg-void/80 px-5 py-3 backdrop-blur-md">

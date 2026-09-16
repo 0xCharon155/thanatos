@@ -1,39 +1,29 @@
 import { create } from "zustand";
 
-export type AltarStatus = "ACTIVE_BURNING" | "EPOCH_EVALUATING" | "REBIRTH_MINTING";
-
-export type AltarState = {
-  epoch: number;
-  status: AltarStatus;
-  deathClockEnd: number;
-  soulWeightCurrent: number;
-  soulWeightTarget: number;
-  treasuryEth: number;
-  dividendEth: number;
-  totalSacrifices: number;
-};
-
+/** Cache of indexed events (Firestore). Live numbers come from contract views via useAltarState. */
 export type Sacrifice = {
   id: string;
   wallet: string;
   amount: string;
   symbol: string;
-  soulWeight: number;
-  clockBonusMin: number;
+  karma: number;
+  verified: boolean;
   timestamp: number;
   pending?: boolean;
 };
 
-export type LeaderEntry = { wallet: string; karma: number; epochKarma: number; burns: number };
+export type LeaderEntry = { wallet: string; lifetimeKarma: number; epochKarma: number; burns: number; tier?: string };
 export type Reincarnation = { epoch: number; name: string; symbol: string; token: string; tx: string; createdAt: number };
+export type AirdropEntry = { epoch: number; amount: string; proof: `0x${string}`[]; token: string };
 
 type Store = {
-  altar: AltarState;
+  status: string;
+  totalSacrifices: number;
   sacrifices: Sacrifice[];
   leaderboard: LeaderEntry[];
   reincarnations: Reincarnation[];
   pulse: number;
-  setAltar: (a: Partial<AltarState>) => void;
+  setMeta: (m: { status?: string; totalSacrifices?: number }) => void;
   setSacrifices: (s: Sacrifice[]) => void;
   addOptimistic: (s: Sacrifice) => void;
   setLeaderboard: (l: LeaderEntry[]) => void;
@@ -41,21 +31,13 @@ type Store = {
 };
 
 export const useThanatosStore = create<Store>((set) => ({
-  altar: {
-    epoch: 1,
-    status: "ACTIVE_BURNING",
-    deathClockEnd: Date.now() + 48 * 3600 * 1000,
-    soulWeightCurrent: 0,
-    soulWeightTarget: 1000,
-    treasuryEth: 0,
-    dividendEth: 0,
-    totalSacrifices: 0,
-  },
+  status: "DORMANT",
+  totalSacrifices: 0,
   sacrifices: [],
   leaderboard: [],
   reincarnations: [],
   pulse: 0,
-  setAltar: (a) => set((s) => ({ altar: { ...s.altar, ...a } })),
+  setMeta: (m) => set(m),
   setSacrifices: (incoming) =>
     set((s) => {
       const pending = s.sacrifices.filter((x) => x.pending && !incoming.some((y) => y.id === x.id));

@@ -20,7 +20,7 @@ export function Leaderboard() {
   return (
     <div className="panel p-5 text-xs">
       <h3 className="panel-title">
-        <Crown className="h-3 w-3 text-flame" /> TOP SACRIFICERS
+        <Crown className="h-3 w-3 text-flame" /> TOP SACRIFICERS · LIFETIME KARMA
       </h3>
       {myIdx >= 0 && (
         <div className="mb-3 border border-ember/40 bg-ember/10 px-3 py-2 text-bone">
@@ -39,11 +39,12 @@ export function Leaderboard() {
                 <span>{short(b.wallet)}</span>
                 <span className={`hidden border px-1.5 py-0.5 text-[9px] tracking-wider sm:inline ${t.cls}`}>{t.label}</span>
               </div>
-              <span className="tabular-nums">{b.karma.toFixed(1)} <span className="text-bone/40">pts</span></span>
+              <span className="tabular-nums">{b.lifetimeKarma.toFixed(1)} <span className="text-bone/40">lifetime</span>{b.epochKarma > 0 && <span className="ml-2 text-flame">+{b.epochKarma.toFixed(1)} this epoch</span>}</span>
             </div>
           );
         })}
       </div>
+      <p className="mt-3 text-[10px] leading-relaxed text-bone/30">Tiers use lifetime karma. Fee share and airdrops use karma earned in each epoch.</p>
     </div>
   );
 }

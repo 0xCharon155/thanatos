@@ -1,18 +1,19 @@
-﻿"use client";
+"use client";
 import { useEffect, useRef } from "react";
 import { useThanatosStore } from "@/store/useThanatosStore";
+import { useAltarState } from "@/hooks/useAltarState";
 
 type P = { x: number; y: number; vx: number; vy: number; life: number; max: number; r: number };
 
 export function NecroPitCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
-  const altar = useThanatosStore((s) => s.altar);
+  const altar = useAltarState();
   const pulse = useThanatosStore((s) => s.pulse);
   const shock = useRef(0);
   const ratio = useRef(0);
 
   useEffect(() => {
-    ratio.current = Math.min(1, altar.soulWeightCurrent / altar.soulWeightTarget);
+    ratio.current = altar.soulTarget > 0 ? Math.min(1, altar.soulWeight / altar.soulTarget) : 0;
   }, [altar]);
 
   useEffect(() => {
@@ -113,12 +114,12 @@ export function NecroPitCanvas() {
     };
   }, []);
 
-  const pct = Math.min(100, (altar.soulWeightCurrent / altar.soulWeightTarget) * 100);
+  const pct = altar.soulTarget > 0 ? Math.min(100, (altar.soulWeight / altar.soulTarget) * 100) : 0;
   return (
     <div className="panel flex h-full flex-col overflow-hidden">
       <canvas ref={ref} className="min-h-[320px] w-full flex-1" />
       <div className="border-t border-ash p-3 text-center text-[10px] tracking-[0.2em] text-bone/50">
-        SOUL BAR: {altar.soulWeightCurrent.toFixed(0)}/{altar.soulWeightTarget.toFixed(0)}
+        SOUL BAR: {altar.soulWeight.toFixed(0)}/{altar.soulTarget.toFixed(0)}
         <div className="mt-2 h-1.5 w-full bg-ash">
           <div className="h-full bg-gradient-to-r from-ember to-flame shadow-[0_0_10px_#f97316] transition-all duration-700" style={{ width: `${pct}%` }} />
         </div>

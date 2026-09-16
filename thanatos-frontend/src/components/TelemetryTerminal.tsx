@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useRef } from "react";
 import { Radio } from "lucide-react";
 import { useSacrificeLogs } from "@/hooks/useSacrificeLogs";
@@ -25,7 +25,7 @@ export function TelemetryTerminal() {
             <span className="text-phosphor/40">[{time(l.timestamp)}]</span> &gt; <span className="text-bone/80">{short(l.wallet)}</span> burned{" "}
             <span className="font-semibold">{Number(l.amount).toLocaleString()} ${l.symbol}</span>
             <div className="pl-4 text-phosphor/60">
-              soul +{l.soulWeight.toFixed(1)} Â· clock +{l.clockBonusMin}m{l.pending ? " Â· PENDING" : ""}
+              karma +{l.karma.toFixed(1)} {l.verified ? "| verified" : "| unverified"}{l.pending ? " | PENDING" : ""}
             </div>
           </div>
         ))}

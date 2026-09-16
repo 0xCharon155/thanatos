@@ -9,7 +9,8 @@ import { NecroPitCanvas } from "@/components/NecroPitCanvas";
 import { TelemetryTerminal } from "@/components/TelemetryTerminal";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Reincarnations } from "@/components/Reincarnations";
-import { DividendModule } from "@/components/DividendModule";
+import { FeeShareVault } from "@/components/FeeShareVault";
+import { AirdropClaim } from "@/components/AirdropClaim";
 
 export default function Page() {
   return (
@@ -31,9 +32,10 @@ export default function Page() {
           <h2 className="text-[10px] tracking-[0.3em] text-bone/40">CIRCULAR ECONOMY &amp; LEADERBOARDS</h2>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-ash" />
         </div>
+        <div className="mb-4"><AirdropClaim /></div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Leaderboard />
-          <DividendModule />
+          <FeeShareVault />
           <Reincarnations />
         </div>
       </section>

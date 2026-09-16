@@ -7,132 +7,119 @@ export const CHAIN = defineChain({
   rpcUrls: { default: { http: [process.env.ROBINHOOD_RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com"] } },
 });
 
-export const ALTAR_ADDRESS = (process.env.ALTAR_ADDRESS ?? "0x0000000000000000000000000000000000000000") as Address;
-export const FEE_SPLITTER_ADDRESS = (process.env.FEE_SPLITTER_ADDRESS ?? "0x0000000000000000000000000000000000000000") as Address;
-export const PONS_FACTORY_ADDRESS = (process.env.PONS_FACTORY_ADDRESS ?? "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e") as Address;
-export const EXPLORER_URL = process.env.BLOCK_EXPLORER_URL ?? "https://robinhoodchain.blockscout.com";
+export const INDEXER_RPC_URL = process.env.INDEXER_RPC_URL;
+export const PUBLIC_RPC_URL = process.env.ROBINHOOD_RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com";
 
-export const FIRST_EPOCH_DURATION_SEC = 6 * 3600;
-export const EPOCH_DURATION_SEC = 24 * 3600;
-export const INITIAL_TARGET = 1000;
-export const TARGET_GROWTH = 1.25;
-export const SEED_BUY_ETH = process.env.SEED_BUY_ETH ?? "0.005";
-export const CLOCK_BONUS_MIN_PER_SW = 1;
-export const TWEET_MIN_SW = 10;
+const ZERO = "0x0000000000000000000000000000000000000000" as Address;
+export const ALTAR_ADDRESS = (process.env.ALTAR_ADDRESS ?? ZERO) as Address;
+export const REINCARNATOR_ADDRESS = (process.env.REINCARNATOR_ADDRESS ?? ZERO) as Address;
+export const ALTAR_DEPLOY_BLOCK = BigInt(process.env.ALTAR_DEPLOY_BLOCK ?? "0");
+export const PONS_FACTORY_ADDRESS = (process.env.PONS_FACTORY_ADDRESS ?? "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e") as Address;
+export const PONS_PAIR_TOKEN = (process.env.PONS_PAIR_TOKEN ?? ZERO) as Address;
+export const LAUNCH_CONFIG_ID = BigInt(process.env.LAUNCH_CONFIG_ID ?? "0");
+export const EXPLORER_URL = process.env.BLOCK_EXPLORER_URL ?? "https://robinhoodchain.blockscout.com";
+export const SITE_URL = process.env.SITE_URL ?? "https://thanatosaltar.xyz";
+export const isDeployed = () => ALTAR_ADDRESS !== ZERO;
+
+export const AIRDROP_TOP_N = 50;
+export const TWEET_MIN_KARMA = 10;
+export const VOUCHER_TTL_SEC = 3600;
+export const DEAD_MULT_BPS = 15000;
+export const ALIVE_MULT_BPS = 10000;
 
 export const altarAbi = [
+  { type: "function", name: "altarFee", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "epoch", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "epochEndsAt", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "soulWeight", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "soulTarget", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "phase", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },
+  { type: "function", name: "treasury", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "totalDistributed", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "claimable", stateMutability: "view", inputs: [{ name: "wallet", type: "address" }], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "karmaOf", stateMutability: "view", inputs: [{ type: "uint256" }, { type: "address" }], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "totalKarmaOf", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "seal", stateMutability: "nonpayable", inputs: [], outputs: [] },
+  { type: "function", name: "rebirth", stateMutability: "nonpayable", inputs: [], outputs: [] },
   {
     type: "event",
-    name: "TokenSacrificed",
+    name: "Offering",
     inputs: [
-      { name: "user", type: "address", indexed: true },
-      { name: "tokenAddress", type: "address", indexed: true },
+      { name: "epoch", type: "uint256", indexed: true },
+      { name: "wallet", type: "address", indexed: true },
+      { name: "token", type: "address", indexed: true },
       { name: "amount", type: "uint256", indexed: false },
-      { name: "timestamp", type: "uint256", indexed: false },
+      { name: "karma", type: "uint256", indexed: false },
+      { name: "verified", type: "bool", indexed: false },
+      { name: "multBps", type: "uint16", indexed: false },
+      { name: "fee", type: "uint256", indexed: false },
     ],
   },
   {
-    type: "function",
-    name: "forwardRebirthToken",
-    stateMutability: "nonpayable",
+    type: "event",
+    name: "Sealed",
     inputs: [
-      { name: "token", type: "address" },
-      { name: "to", type: "address" },
-      { name: "amount", type: "uint256" },
+      { name: "epoch", type: "uint256", indexed: true },
+      { name: "soulWeight", type: "uint256", indexed: false },
+      { name: "totalKarma", type: "uint256", indexed: false },
     ],
-    outputs: [],
   },
   {
-    type: "function",
-    name: "executeRebirthSeed",
-    stateMutability: "nonpayable",
+    type: "event",
+    name: "Reborn",
     inputs: [
-      { name: "factoryAddress", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "data", type: "bytes" },
+      { name: "epoch", type: "uint256", indexed: true },
+      { name: "newToken", type: "address", indexed: false },
+      { name: "feeShare", type: "uint256", indexed: false },
+      { name: "seeded", type: "uint256", indexed: false },
+      { name: "buyback", type: "uint256", indexed: false },
+      { name: "protocol", type: "uint256", indexed: false },
     ],
-    outputs: [{ name: "", type: "bytes" }],
+  },
+  {
+    type: "event",
+    name: "Claimed",
+    inputs: [
+      { name: "wallet", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+      { name: "fromEpoch", type: "uint256", indexed: false },
+      { name: "toEpoch", type: "uint256", indexed: false },
+    ],
   },
 ] as const;
 
-export const feeSplitterAbi = [
+export const reincarnatorAbi = [
   {
     type: "function",
-    name: "setKarma",
+    name: "stage",
     stateMutability: "nonpayable",
     inputs: [
-      { name: "users", type: "address[]" },
-      { name: "amounts", type: "uint256[]" },
+      { name: "epoch", type: "uint256" },
+      { name: "name", type: "string" },
+      { name: "symbol", type: "string" },
+      { name: "logo", type: "string" },
+      { name: "description", type: "string" },
+      { name: "twitter", type: "string" },
+      { name: "website", type: "string" },
     ],
     outputs: [],
   },
-  { type: "function", name: "dividendPool", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] },
+  { type: "function", name: "setMerkleRoot", stateMutability: "nonpayable", inputs: [{ type: "uint256" }, { type: "bytes32" }], outputs: [] },
+  { type: "function", name: "tokenOf", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "address" }] },
+  { type: "function", name: "airdropSupplyOf", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "merkleRootOf", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "bytes32" }] },
+  {
+    type: "function",
+    name: "staged",
+    stateMutability: "view",
+    inputs: [{ type: "uint256" }],
+    outputs: [
+      { type: "string" }, { type: "string" }, { type: "string" }, { type: "string" }, { type: "string" }, { type: "string" }, { type: "bool" },
+    ],
+  },
 ] as const;
-
-export const PAIR_TOKEN = (process.env.PONS_PAIR_TOKEN ?? "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC") as Address;
-export const LAUNCH_CONFIG_ID = 0n;
-export const CREATOR_TAX_BPS = 95;
-export const SITE_URL = process.env.SITE_URL ?? "https://thanatosaltar.xyz";
 
 export const ponsFactoryAbi = [
-  {
-    type: "function",
-    name: "launchToken",
-    stateMutability: "payable",
-    inputs: [
-      {
-        name: "params",
-        type: "tuple",
-        components: [
-          { name: "name", type: "string" },
-          { name: "symbol", type: "string" },
-          { name: "logo", type: "string" },
-          { name: "description", type: "string" },
-          {
-            name: "socials",
-            type: "tuple",
-            components: [
-              { name: "twitter", type: "string" },
-              { name: "telegram", type: "string" },
-              { name: "discord", type: "string" },
-              { name: "website", type: "string" },
-              { name: "farcaster", type: "string" },
-            ],
-          },
-          { name: "creatorFeeRecipient", type: "address" },
-          { name: "creatorTaxBps", type: "uint16" },
-          { name: "buybackEnabled", type: "bool" },
-          { name: "expectedEconomics", type: "bytes32" },
-          { name: "salt", type: "bytes32" },
-        ],
-      },
-      { name: "launchConfigId", type: "uint256" },
-      { name: "pairToken", type: "address" },
-      { name: "snipeTaxExemptions", type: "address[]" },
-    ],
-    outputs: [{ name: "token", type: "address" }],
-  },
-  {
-    type: "function",
-    name: "previewLaunchEconomics",
-    stateMutability: "view",
-    inputs: [
-      { name: "launchConfigId", type: "uint256" },
-      { name: "pairToken", type: "address" },
-    ],
-    outputs: [{ name: "", type: "bytes32" }],
-  },
-  { type: "function", name: "launchFee", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] },
-  {
-    type: "event",
-    name: "TokenLaunched",
-    inputs: [
-      { name: "token", type: "address", indexed: true },
-      { name: "curve", type: "address", indexed: true },
-      { name: "deployer", type: "address", indexed: true },
-      { name: "pairToken", type: "address", indexed: false },
-      { name: "launchConfigId", type: "uint256", indexed: false },
-      { name: "graduationThreshold", type: "uint256", indexed: false },
-    ],
-  },
+  { type: "function", name: "launchFee", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "previewLaunchEconomics", stateMutability: "view", inputs: [{ type: "uint256" }, { type: "address" }], outputs: [{ type: "bytes32" }] },
 ] as const;
