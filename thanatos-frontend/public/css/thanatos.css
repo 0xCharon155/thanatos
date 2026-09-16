@@ -560,7 +560,6 @@ footer{margin-top:0}
 .rite .n{transition:text-shadow .4s var(--out),opacity .4s;opacity:.55}
 .rite.lit .n{opacity:1;text-shadow:0 0 18px currentColor}
 /* Θ berputar pelan mengikuti scroll */
-.climax .mark svg{transform:rotate(calc(var(--sp,0)*-50deg));transition:transform .12s linear}
 @media (prefers-reduced-motion:reduce){.sc .sc-torch,.sc .sc-figure,.sc .sc-lectern,.sc .sc-mirror,.sc .sc-embers,.scribe-card .mirror,.climax .mark svg{transform:none!important}.rite .n{opacity:1}.sc .sc-ripple{display:none}}
 
 /* ── airdrop rows (vault card) ─────────────────────────────────────── */
