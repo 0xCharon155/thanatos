@@ -1,4 +1,4 @@
-﻿import { defineChain, type Address } from "viem";
+import { defineChain, type Address } from "viem";
 
 export const CHAIN = defineChain({
   id: Number(process.env.ROBINHOOD_CHAIN_ID ?? 4663),
@@ -72,7 +72,7 @@ export const feeSplitterAbi = [
 export const PAIR_TOKEN = (process.env.PONS_PAIR_TOKEN ?? "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC") as Address;
 export const LAUNCH_CONFIG_ID = 0n;
 export const CREATOR_TAX_BPS = 95;
-export const SITE_URL = process.env.SITE_URL ?? "https://thanatos-e440a.web.app";
+export const SITE_URL = process.env.SITE_URL ?? "https://thanatosaltar.xyz";
 
 export const ponsFactoryAbi = [
   {

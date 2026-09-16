@@ -1,10 +1,10 @@
-﻿# $THANATOS // The Autonomous Necromancer Protocol
+# $THANATOS // The Autonomous Necromancer Protocol
 
 > Feed your dead tokens to the Altar. Every burn adds soul weight and bends the death clock.
 > When the clock strikes zero, the ashes are reborn as a new token â€” and the burners inherit it.
 
 **Chain:** Robinhood Chain (EVM L2, chain id `4663`)
-**Live:** https://thanatos-e440a.web.app
+**Live:** https://thanatosaltar.xyz
 **Bot:** [@ThanatosAltar](https://x.com/ThanatosAltar)
 
 ---

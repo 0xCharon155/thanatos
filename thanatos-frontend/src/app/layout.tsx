@@ -10,8 +10,17 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://thanatosaltar.xyz"),
   title: "$THANATOS // Necromancer Protocol",
   description: "Incinerate dead tokens. Feed the altar. Claim the rebirth.",
+  openGraph: {
+    title: "$THANATOS // The Autonomous Necromancer",
+    description: "Burn dead tokens, earn Karma, inherit every rebirth. Robinhood Chain.",
+    url: "https://thanatosaltar.xyz",
+    siteName: "THANATOS",
+    images: [{ url: "/logo.png", width: 1080, height: 1080 }],
+  },
+  twitter: { card: "summary_large_image", site: "@ThanatosAltar", images: ["/logo.png"] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
