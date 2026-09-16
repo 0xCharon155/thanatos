@@ -4,6 +4,7 @@
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const short = a => a && a.length > 13 ? a.slice(0, 6) + "…" + a.slice(-4) : (a || "—");
+  const mid = a => a && a.length > 22 ? a.slice(0, 10) + "…" + a.slice(-8) : (a || "—");
   const eth = (wei, d = 4) => A.fmt(wei, 18, d);
   const n0 = n => Math.round(n).toLocaleString("en-US");
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -69,7 +70,7 @@
     const st = S(), s = IDX?.state || {};
     const epEl = $("#m-epoch"), epTxt = st.live || IDX ? roman(st.epoch) : "—";
     if (epEl.textContent !== epTxt) { epEl.classList.add("xf"); setTimeout(() => { epEl.textContent = epTxt; $("#altar-epoch").textContent = epTxt; epEl.classList.remove("xf"); }, REDUCE ? 0 : 200); }
-    $("#m-epoch-sub").textContent = s.beganAt ? "began " + new Date(s.beganAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC" : "—";
+    $("#m-epoch-sub").textContent = s.beganAt ? "began " + new Date(s.beganAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC" : ""; $("#m-epoch-sub").hidden = !s.beganAt;
     $("#m-epoch-src").innerHTML = SRC[st.src];
     tween($("#m-soul"), st.soul, v => `${n0(v)}<small>/ ${n0(st.soulTarget)}</small>`); $("#m-soul-src").innerHTML = SRC[st.src];
     const pct = Math.min(100, 100 * st.soul / (st.soulTarget || 1));
@@ -162,7 +163,7 @@
     const has = A.isSet(CFG.token); bar.hidden = !has; if (!has) return;
     if (!$("#tb-mark").innerHTML) $("#tb-mark").innerHTML = ic("logo-monogram", "i");
     if (!$("#tb-copy").innerHTML) $("#tb-copy").innerHTML = `${ic("copy", "i s")} copy`;
-    $("#tb-addr").textContent = innerWidth < 900 ? short(CFG.token) : CFG.token;
+    $("#tb-addr").textContent = innerWidth < 900 ? mid(CFG.token) : CFG.token;
     const t = $("#tb-trade"); t.href = CFG.links.pons || ex("token", CFG.token);
     const ch = $("#tb-chart"); ch.hidden = !CFG.links.chart; if (CFG.links.chart) ch.href = CFG.links.chart;
   }
@@ -171,7 +172,12 @@
     b.classList.add("done"); $("#tb-copy").innerHTML = `${ic("shield-check", "i s")} copied`; toast("ok", `<b>Contract address copied.</b> <span class="mono">${esc(CFG.token)}</span>`);
     setTimeout(() => { b.classList.remove("done"); $("#tb-copy").innerHTML = `${ic("copy", "i s")} copy`; }, 1600);
   });
-  addEventListener("resize", () => { if (A.isSet(CFG.token)) $("#tb-addr").textContent = innerWidth < 900 ? short(CFG.token) : CFG.token; });
+  addEventListener("resize", () => { if (A.isSet(CFG.token)) $("#tb-addr").textContent = innerWidth < 900 ? mid(CFG.token) : CFG.token; });
+  // phones: the bar leaves the hero (no parallax there) and sits above the metrics, where it stays put while scrolling
+  const PHONE = matchMedia("(max-width:900px)");
+  const placeTokenBar = () => { const tb = $("#tokenbar"), slot = $("#tb-slot"), cta = $(".hero .cta"); if (!tb || !slot || !cta) return;
+    if (PHONE.matches) { if (tb.parentElement !== slot) slot.appendChild(tb); } else if (tb.parentElement === slot) cta.after(tb); };
+  placeTokenBar(); PHONE.addEventListener("change", placeTokenBar);
 
   function renderProof() {
     const st = S();
@@ -180,9 +186,9 @@
     $("#pf-src").innerHTML = CFG.verifiedSource ? `<a href="${esc(CFG.verifiedSource)}" target="_blank" rel="noopener">Verified source ↗</a>` : `<span>source not published</span>`;
     $("#pf-tre").textContent = st.live ? `${eth(CH.treasuryWei, 4)} ETH` : "—"; $("#pf-tre-src").innerHTML = st.live ? SRC.chain : "";
     $("#pf-token").innerHTML = CFG.token ? `<a href="${ex("token", CFG.token)}" target="_blank" rel="noopener" style="color:var(--bone)">${esc(short(CFG.token))} ↗</a>` : '<span class="dim">not launched</span>';
-    $("#pf-token-sub").innerHTML = CFG.token ? `<span>2.7% of volume → holders (Pons Holder Fee Sharing)</span>${CFG.links.chart ? ` · <a href="${esc(CFG.links.chart)}" target="_blank" rel="noopener">Chart ↗</a>` : ""}` : "";
-    $("#pf-tre-src").innerHTML = st.live ? SRC.chain + (CH?.uncollectedWei > 0n ? ` · <span>${eth(CH.uncollectedWei, 4)} ETH uncollected in the <a href="${ex("address", CFG.feeEscrow)}" target="_blank" rel="noopener">Pons escrow</a></span>` : "") : "";
-    $("#pf-src").innerHTML += A.isSet(CFG.reincarnator) ? ` · <a href="${ex("address", CFG.reincarnator)}" target="_blank" rel="noopener">Reincarnator ↗</a>` : "";
+    $("#pf-token-sub").innerHTML = CFG.token ? `<span>2.7% of volume → holders · Pons Holder Fee Sharing</span>${CFG.links.pons ? `<a href="${esc(CFG.links.pons)}" target="_blank" rel="noopener">Pons ↗</a>` : ""}${CFG.links.chart ? `<a href="${esc(CFG.links.chart)}" target="_blank" rel="noopener">Chart ↗</a>` : ""}` : "";
+    $("#pf-tre-src").innerHTML = st.live ? SRC.chain + (CH?.uncollectedWei > 0n ? `<span>${eth(CH.uncollectedWei, 4)} ETH uncollected in the <a href="${ex("address", CFG.feeEscrow)}" target="_blank" rel="noopener">Pons escrow</a></span>` : "") : "";
+    $("#pf-src").innerHTML += A.isSet(CFG.reincarnator) ? `<a href="${ex("address", CFG.reincarnator)}" target="_blank" rel="noopener">Reincarnator ↗</a>` : "";
     $("#pf-block").textContent = CH?.block ? n0(CH.block) : "rpc unreachable"; $("#pf-block").title = CH?.block ? `via ${D.rpcUrl()}` : "";
     const u = IDX?.state?.updatedAt; $("#pf-idx").textContent = !u ? "idle" : (Date.now() - u < 60e3 ? `${Math.max(1, Math.round((Date.now() - u) / 1000))} s ago` : Date.now() - u < 4 * 60e3 ? `${Math.round((Date.now() - u) / 60e3)} min ago` : `stale · ${Math.round((Date.now() - u) / 60e3)} min`);
     $("#pf-idx").style.color = !u ? "var(--bone-3)" : Date.now() - u < 4 * 60e3 ? "var(--phosphor)" : "var(--amber)";
@@ -289,8 +295,9 @@
       $(".top")?.classList.toggle("solid", scrollY > 32);   // padat begitu bergerak — teks hero yang parallax tidak lagi menembus header
       if (prog) prog.style.width = (100 * scrollY / Math.max(1, document.documentElement.scrollHeight - vh())).toFixed(2) + "%";
       if (REDUCE) return;
-      if (heroIn) { heroIn.style.transform = `translateY(${(scrollY * .18).toFixed(1)}px)`; heroIn.style.opacity = String(Math.max(0, 1 - p * 1.25)); }
-      if (heroFoot) heroFoot.style.opacity = String(Math.max(0, 1 - p * 1.6));
+      if (PHONE.matches) { if (heroIn) { heroIn.style.transform = ""; heroIn.style.opacity = ""; } if (heroFoot) heroFoot.style.opacity = ""; }
+      else { if (heroIn) { heroIn.style.transform = `translateY(${(scrollY * .18).toFixed(1)}px)`; heroIn.style.opacity = String(Math.max(0, 1 - p * 1.25)); }
+        if (heroFoot) heroFoot.style.opacity = String(Math.max(0, 1 - p * 1.6)); }
       if (scribe) scribe.style.setProperty("--sp", rel(scribe).toFixed(3));
       if (climax) climax.style.setProperty("--sp", rel(climax).toFixed(3));
       if (riteLine && sec) { const r = sec.getBoundingClientRect(); const q = Math.min(1, Math.max(0, (vh() * .85 - r.top) / (r.height * .9))); riteLine.style.width = (q * 100).toFixed(1) + "%"; rites.forEach((el, i) => el.classList.toggle("lit", q > (i + .55) / rites.length)); }

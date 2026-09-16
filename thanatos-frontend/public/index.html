@@ -49,11 +49,10 @@
     <div class="state"><span class="pill dormant" id="altar-state-pill"><span class="g" id="altar-state-glyph"></span><span class="t">Dormant</span></span><span class="ep">Epoch <b id="altar-epoch">—</b></span><span class="clock off" id="hero-clock">--:--:--</span></div>
     <div class="cta"><a class="btn ember lg" href="#offer">Offer a dead token</a><a class="btn ghost lg" href="#ritual">How the ritual works</a></div>
     <div class="tokenbar" id="tokenbar" hidden>
-      <span class="tb-mark" id="tb-mark"></span>
-      <span class="tb-sym">$THANATOS</span>
+      <span class="tb-head"><span class="tb-mark" id="tb-mark"></span><span class="tb-sym">$THANATOS</span><span class="tb-sub">Robinhood Chain · Pons</span></span>
       <button class="tb-ca" id="tb-ca" type="button" title="Copy contract address"><span class="label">CA</span><code id="tb-addr"></code><span class="tb-copy" id="tb-copy"></span></button>
       <a class="btn ember sm tb-trade" id="tb-trade" href="#" target="_blank" rel="noopener">Trade on Pons ↗</a>
-      <a class="btn sm" id="tb-chart" href="#" target="_blank" rel="noopener" hidden>Chart ↗</a>
+      <a class="btn sm tb-chart" id="tb-chart" href="#" target="_blank" rel="noopener" title="Chart on GeckoTerminal" hidden>Chart ↗</a>
     </div>
   </div>
   <div class="hero-foot">
@@ -63,6 +62,7 @@
 </section>
 
 <main class="wrap">
+  <div class="tb-slot" id="tb-slot"></div>
   <section class="metrics" aria-label="Altar metrics">
     <div class="metric"><span class="label">Active epoch</span><div class="v epoch" id="m-epoch">—</div><div class="foot"><span class="sub" id="m-epoch-sub">—</span><span class="src" id="m-epoch-src"></span></div></div>
     <div class="metric"><span class="label">Death clock</span><div class="v clock off" id="m-clock">--:--:--</div><div class="foot"><span class="sub" id="m-clock-sub">until the altar seals</span><span class="src" id="m-clock-src"></span></div></div>
@@ -144,8 +144,8 @@
   <section class="section reveal" id="proof" aria-label="Proof">
     <header><span id="ico-shield"></span><h2 class="t-sec">Proof</h2></header>
     <div class="proof">
-      <div class="pf"><span class="label">Altar contract</span><div class="v" id="pf-altar">—</div><div class="sub"><span class="badge dim" id="pf-altar-badge">unset</span><span id="pf-src"></span></div></div>
-      <div class="pf"><span class="label">Treasury balance</span><div class="v" id="pf-tre">—</div><div class="sub"><span class="src" id="pf-tre-src"></span></div></div>
+      <div class="pf"><span class="label">Altar contract</span><div class="v" id="pf-altar">—</div><div class="sub"><span class="badge dim" id="pf-altar-badge">unset</span><span class="flat" id="pf-src"></span></div></div>
+      <div class="pf"><span class="label">Treasury balance</span><div class="v" id="pf-tre">—</div><div class="sub" id="pf-tre-src"></div></div>
       <div class="pf"><span class="label">$THANATOS token</span><div class="v" id="pf-token">—</div><div class="sub" id="pf-token-sub"></div></div>
       <div class="pf"><span class="label">Latest block</span><div class="v" id="pf-block">—</div><div class="sub"><span class="src chain"><b>◆</b>on-chain</span></div></div>
       <div class="pf"><span class="label">Indexer</span><div class="v" id="pf-idx">—</div><div class="sub"><span class="src idx"><b>▤</b>indexed</span></div></div>
