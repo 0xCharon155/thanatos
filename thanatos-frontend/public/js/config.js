@@ -12,7 +12,7 @@ window.THANATOS = {
   altar: "0xA33c08FF354C5Fd91Ab2C30CCC2DbeFd8722d2a2",          // ThanatosAltarV2
   reincarnator: "0x961a81B937cD7a5aB649a4A985578c8fA4177fE3",   // Reincarnator (airdrop claims)
   feeEscrow: "0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e",      // Pons v2 fee escrow: creator revenue waits here until collect()
-  token: "",                 // $THANATOS (Pons)
+  token: "0x54fa89cE31A10a1e5Ef57734C6DB9eEc203B434F",                 // $THANATOS (Pons)
   voucherUrl: "https://us-central1-thanatos-e440a.cloudfunctions.net/voucher",            // Cloud Function `voucher` — signs deadness vouchers
   verifiedSource: "https://robinhoodchain.blockscout.com/address/0xA33c08FF354C5Fd91Ab2C30CCC2DbeFd8722d2a2?tab=contract",        // Blockscout "Verified" link
   audit: "",                 // audit link (empty = shows "unaudited")
@@ -32,6 +32,6 @@ window.THANATOS = {
   ],
   epoch: { minHours: 6, minTreasuryEth: "0.01", deadnessPct: 5 },
 
-  links: { x: "https://x.com/ThanatosAltar", telegram: "", pons: "", dexscreener: "", github: "https://github.com/0xCharon155/thanatos" },
+  links: { x: "https://x.com/ThanatosAltar", telegram: "", pons: "https://www.ponsfamily.com/token/0x54fa89cE31A10a1e5Ef57734C6DB9eEc203B434F", dexscreener: "https://dexscreener.com/robinhood/0x54fa89cE31A10a1e5Ef57734C6DB9eEc203B434F", github: "https://github.com/0xCharon155/thanatos" },
   pollMs: 12000,
 };
