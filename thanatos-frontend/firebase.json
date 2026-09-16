@@ -1,1 +1,10 @@
-{ "hosting": { "public": "out", "ignore": ["firebase.json", "**/.*", "**/node_modules/**"], "cleanUrls": true } }
+{
+  "hosting": {
+    "public": "public",
+    "cleanUrls": true,
+    "ignore": ["firebase.json", "**/.*"],
+    "headers": [
+      { "source": "**/*.@(js|css|svg|png|webp)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }
+    ]
+  }
+}
